@@ -1,0 +1,58 @@
+Feature,Importance
+Monetary,0.5913114450357085
+AvgProductsPerInvoice,0.07267318799086364
+TotalQuantity,0.05277774158119174
+UniqueProducts,0.04905534236776875
+MaxRevenue,0.03553565263806912
+MaxQuantity,0.03126208518627639
+Frequency,0.031123095453596084
+RevenueSTD,0.026066090201279264
+ActiveMonths,0.022842792732683057
+Recency,0.017507211160999753
+AvgQuantity,0.016776159215322866
+WeekendPurchaseRate,0.012466973994574953
+Country_Netherlands,0.011983457098461131
+AvgRevenue,0.009948243194772142
+PurchaseSpan,0.008851524516756273
+Country_Norway,0.0035100865820484137
+CustomerSegment_Exceptional High-Value Customer,0.0016783771248396148
+CustomerSegment_VIP Customers,0.001608655688264557
+Country_Japan,0.0014669260146591757
+Country_United Kingdom,0.0011625766042294681
+Country_France,0.00011027903968015403
+Country_Switzerland,9.726745037785138e-05
+Country_Italy,8.572703173127192e-05
+Country_Denmark,7.88022105504562e-05
+Country_EIRE,2.0299885295409172e-05
+Country_European Community,0.0
+Country_Czech Republic,0.0
+Country_Channel Islands,0.0
+Country_Cyprus,0.0
+Country_Canada,0.0
+Country_Brazil,0.0
+Country_Bahrain,0.0
+Country_Belgium,0.0
+Country_Austria,0.0
+Country_Israel,0.0
+Country_Korea,0.0
+Country_Lebanon,0.0
+Country_Iceland,0.0
+Country_Germany,0.0
+Country_Greece,0.0
+Country_Finland,0.0
+Country_Poland,0.0
+Country_Nigeria,0.0
+Country_Lithuania,0.0
+Country_Malta,0.0
+Country_Singapore,0.0
+Country_Portugal,0.0
+Country_Saudi Arabia,0.0
+Country_RSA,0.0
+Country_Thailand,0.0
+Country_Sweden,0.0
+Country_Spain,0.0
+Country_USA,0.0
+Country_Unspecified,0.0
+Country_United Arab Emirates,0.0
+Country_West Indies,0.0
+CustomerSegment_Regular Customers,0.0

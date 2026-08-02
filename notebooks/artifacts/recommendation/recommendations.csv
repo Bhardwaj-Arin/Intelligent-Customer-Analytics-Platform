@@ -1,0 +1,5 @@
+Customer Scenario,Recommended Strategy
+New Customer,Popularity-Based
+Existing Customer,Customer Collaborative
+Returning Customer,Item Collaborative
+Unknown Customer,Popularity-Based (Fallback)

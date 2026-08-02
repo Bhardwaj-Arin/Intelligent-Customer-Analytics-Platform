@@ -1,0 +1,5 @@
+Cluster,Recency,Frequency,Monetary,TotalQuantity,AvgQuantity,MedianQuantity,MaxQuantity,MinQuantity,QuantitySTD,AvgRevenue,MedianRevenue,MaxRevenue,MinRevenue,RevenueSTD,RevenueRange,UniqueProducts,AvgProductsPerInvoice,ActiveMonths,PurchaseSpan,WeekendPurchaseRate,AvgDaysBetweenPurchases,CancelledTransactions,CancelledRevenue,CancellationRate,CustomerCount
+0,310.15,2.07,673.41,402.45,19.87,16.59,56.75,8.98,12.5,330.93,324.79,409.83,264.11,78.29,145.72,34.18,19.56,1.75,69.83,14.41,39.25,0.34,-46.49,8.85,3242
+1,1.0,2.0,168472.5,80997.0,26999.0,1.0,80995.0,1.0,46761.91,84236.25,84236.25,168469.6,2.9,119123.95,168466.7,3.0,1.5,2.0,204.0,0.0,204.0,2.0,-168478.6,50.0,1
+2,75.15,111.52,145090.8,97437.26,527.57,304.41,5448.48,29.48,964.35,3430.47,2011.08,16519.02,783.63,4089.24,15735.39,632.41,16.99,9.96,592.78,4.35,11.34,24.11,-12031.03,18.59,27
+3,67.44,10.44,4258.32,2491.34,16.55,11.73,118.29,2.21,18.31,388.94,361.78,786.16,138.89,215.07,647.27,135.75,22.98,5.73,522.33,14.65,117.21,2.33,-145.6,15.28,2608
