@@ -41,10 +41,10 @@ from utils.config import (
 
 def load_cleaned_data():
     """
-    Load the final cleaned dataset.
+    Load the cleaned dataset used by the dashboard.
     """
     return load_csv(
-        PROCESSED_DATA_DIR / "final_cleaned_dataset.csv"
+        PROCESSED_DATA_DIR / "cleaned_online_retail.csv"
     )
 
 
