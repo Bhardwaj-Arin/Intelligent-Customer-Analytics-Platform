@@ -2,252 +2,355 @@
 
 <div align="center">
 
-[![Live Demo](https://img.shields.io/badge/Streamlit-Live%20Demo-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://intelligent-customer-analytics-platform.streamlit.app)
-[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML%20Pipeline-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![Live Demo](https://img.shields.io/badge/Streamlit-Live%20Demo-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://intelligent-customer-analytics-platform-rjpaaejbalwimmv6xhvwen.streamlit.app/)
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Scikit--Learn](https://img.shields.io/badge/Scikit--Learn-ML%20Pipeline-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-Gradient%20Boosting-337AB7?style=for-the-badge)](https://xgboost.readthedocs.io/)
 [![Plotly](https://img.shields.io/badge/Plotly-Interactive%20Viz-3F4F75?style=for-the-badge&logo=plotly&logoColor=white)](https://plotly.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-*An end-to-end Machine Learning & Business Intelligence platform transforming raw e-commerce transaction data into actionable customer insights, predictive analytics, and personalized product recommendations.*
+*An end-to-end Machine Learning & Business Intelligence platform that transforms raw e-commerce transaction data into customer segments, lifetime value forecasts, churn risk scores, and personalized product recommendations — all inside one interactive dashboard.*
 
-[Live Demo App](https://intelligent-customer-analytics-platform.streamlit.app) • [Overview](#-overview) • [Key Features](#-key-features) • [Theoretical Foundations](#-theoretical-foundations--methodology) • [Dashboard Pages](#-dashboard-pages) • [Getting Started](#%EF%B8%8F-getting-started)
+[**Live Demo**](https://intelligent-customer-analytics-platform-rjpaaejbalwimmv6xhvwen.streamlit.app/) • [Overview](#-overview) • [Key Features](#-key-features) • [Methodology](#-methodology) • [Dashboard Pages](#-dashboard-pages) • [Getting Started](#️-getting-started)
 
 </div>
 
 ---
 
 ## 📌 Table of Contents
+
 - [Overview](#-overview)
 - [System Architecture & Workflow](#-system-architecture--workflow)
 - [Key Features](#-key-features)
-- [Theoretical Foundations & Methodology](#-theoretical-foundations--methodology)
-  - [1. Data Preprocessing & Validation](#1-data-preprocessing--validation)
+- [Methodology](#-methodology)
+  - [1. Data Cleaning & Validation](#1-data-cleaning--validation)
   - [2. Feature Engineering & RFM Modeling](#2-feature-engineering--rfm-modeling)
   - [3. Customer Segmentation (K-Means Clustering)](#3-customer-segmentation-k-means-clustering)
   - [4. Customer Lifetime Value (CLV) Prediction](#4-customer-lifetime-value-clv-prediction)
-  - [5. Churn Risk Analytics](#5-churn-risk-analytics)
+  - [5. Churn Prediction](#5-churn-prediction)
   - [6. Hybrid Recommendation System](#6-hybrid-recommendation-system)
-- [Dataset Characteristics](#-dataset-characteristics)
-- [Dashboard Page Guide](#-dashboard-page-guide)
+- [Model Results](#-model-results)
+- [Dataset](#-dataset)
+- [Dashboard Pages](#-dashboard-pages)
 - [Tech Stack](#-tech-stack)
-- [Project Directory Structure](#-project-directory-structure)
-- [Getting Started](#%EF%B8%8F-getting-started)
-- [Business Impact & Strategic Value](#-business-impact--strategic-value)
-- [Roadmap & Future Enhancements](#-roadmap--future-enhancements)
+- [Project Structure](#-project-structure)
+- [Getting Started](#️-getting-started)
+- [Business Impact](#-business-impact)
+- [Known Limitations & Roadmap](#-known-limitations--roadmap)
 - [Author](#-author)
 
 ---
 
 ## 🎯 Overview
 
-Most portfolio machine learning projects terminate within isolated Jupyter Notebooks without providing an executive-facing interactive UI or real-world application. The **Intelligent Customer Analytics Platform** addresses this gap by creating an enterprise-grade analytics platform that converts raw e-commerce order logs into end-to-end data products.
+Businesses collect enormous volumes of customer data but routinely struggle to turn it into decisions. Without proper analysis, it's hard to know who your best customers are, who's about to leave, or what to recommend to whom.
 
-Using real transactional logs from the **Online Retail II dataset** (containing over 500,000 transaction records), this platform cleans, engineers, models, and evaluates customer purchase behavior across multiple dimensions:
+The **Intelligent Customer Analytics Platform** takes real transactional logs from the **Online Retail II dataset** — 797,815 cleaned transactions across 5,900+ customers, 4,000+ products, and 38 countries — and pushes them through a complete, reproducible pipeline covering four layers of analytics:
 
-1. **Descriptive Analytics**: Real-time sales KPIs, temporal purchase distribution, geographical concentration, and high-volume product breakdown.
-2. **Customer Behavioral Segmentation**: Unsupervised group discovery based on purchase recency, frequency, and monetary throughput.
-3. **Predictive Analytics**: Forecasting future lifetime monetary yield (**CLV**) and quantifying customer departure probability (**Churn**).
-4. **Prescriptive Systems**: Delivering personal product recommendations using a multi-algorithm hybrid approach (Popularity, Item-Item Similarity, Collaborative Filtering).
+1. **Descriptive Analytics** — real-time sales KPIs, revenue trends, country and product performance, time-based purchase patterns.
+2. **Behavioral Segmentation** — unsupervised customer grouping based on Recency, Frequency, and Monetary (RFM) value.
+3. **Predictive Analytics** — forecasting Customer Lifetime Value (CLV) and estimating churn probability per customer.
+4. **Prescriptive Systems** — personalized product recommendations via a hybrid of popularity ranking, collaborative filtering, and item-item similarity.
+
+Unlike a project that ends inside a Jupyter notebook, every model here is wired into a live, 8-page **Streamlit dashboard** that a non-technical stakeholder can actually use.
+
+**🔗 [Try the live app](https://intelligent-customer-analytics-platform-rjpaaejbalwimmv6xhvwen.streamlit.app/)**
 
 ---
 
 ## 🏗 System Architecture & Workflow
 
+```
+Raw Transaction Data (Online Retail II)
+              │
+              ▼
+   Data Cleaning & Validation  ──────────►  final_cleaned_dataset.csv
+              │                             (single canonical dataset)
+              ▼
+   Exploratory Data Analysis
+              │
+              ▼
+   Feature Engineering (RFM)
+              │
+   ┌──────────┼────────────────┬─────────────────────┐
+   ▼          ▼                ▼                      ▼
+Customer    CLV              Churn              Recommendation
+Segmentation Prediction     Prediction              System
+(K-Means)  (Gradient        (Gradient          (Popularity + Item
+            Boosting)        Boosting)           Similarity + CF)
+   │          │                │                      │
+   └──────────┴────────────────┴──────────────────────┘
+                              │
+                              ▼
+              8-Page Interactive Streamlit Dashboard
+                    (deployed on Streamlit Cloud)
+```
 
-
-┌─────────────────────────────────────────┐
-                    │   Raw E-Commerce Transactional Data     │
-                    │        (Online Retail II Dataset)       │
-                    └────────────────────┬────────────────────┘
-                                         │
-                                         ▼
-                    ┌─────────────────────────────────────────┐
-                    │   Data Cleaning & Validation Pipeline   │
-                    │ (Duplicates, Cancellations, Null IDs)   │
-                    └────────────────────┬────────────────────┘
-                                         │
-                                         ▼
-                    ┌─────────────────────────────────────────┐
-                    │        RFM Feature Engineering          │
-                    │    (Recency, Frequency, Monetary, etc)  │
-                    └────────────────────┬────────────────────┘
-                                         │
-  ┌──────────────────────┬───────────────┴───────────────┬──────────────────────┐
-  ▼                      ▼                               ▼                      ▼
-┌───────────┐      ┌───────────────────┐           ┌───────────────────┐  ┌───────────────────┐
-│ Customer  │      │   CLV Prediction  │           │  Churn Prediction │  │  Recommendation   │
-│ Segments  │      │    (Regression)   │           │  (Classification) │  │  System (Hybrid)  │
-└─────┬─────┘      └─────────┬─────────┘           └─────────┬─────────┘  └─────────┬─────────┘
-│                      │                               │                      │
-└──────────────────────┴───────────────┬───────────────┴──────────────────────┘
-│
-▼
-┌─────────────────────────────────────────┐
-│     Interactive Streamlit Dashboard     │
-│         (8 Modular Page Views)          │
-└─────────────────────────────────────────┘
-
+Every stage is backed by version-controlled code in `src/`, a corresponding Jupyter notebook in `notebooks/`, and a written report in `reports/documentation/` — not just exploratory scratch work.
 
 ---
 
 ## ✨ Key Features
 
-- **Executive KPI Dashboard**: Live tracking of gross revenue, purchase frequencies, unit quantities, and top-performing markets.
-- **Dynamic Data Filtering**: Interactive temporal, geographical, and SKU-level slice-and-dice tools on every page.
-- **Automated Customer Segmentation**: Unsupervised RFM clustering with automated business persona labels (*Champions*, *Loyal*, *At Risk*, *Lost*).
-- **Predictive CLV & Churn Estimators**: Interactive "What-If" scenarios allowing users to enter custom RFM parameters to compute live predictions.
-- **3-Tiered Recommendation Engines**: Instant switching between baseline popularity models, item-item similarity matrices, user-collaborative filtering, and blended hybrid recommendations.
-- **Executive Insight Generation**: Automated revenue concentration risk assessments, segment share distributions, and playbooks.
+**Analytics**
+- Executive KPIs and revenue trend analysis across 797K+ transactions
+- Country, product, and time-based sales breakdowns (day-of-week, time-of-day, weekday vs. weekend)
+- Interactive filters and CSV export on every dashboard page
+
+**Machine Learning**
+- Customer segmentation via K-Means clustering on RFM features
+- Customer Lifetime Value prediction via a tuned Gradient Boosting regressor
+- Churn prediction via a tuned Gradient Boosting classifier
+- A hybrid recommendation engine combining popularity ranking, customer-based collaborative filtering, item-item similarity, and association rule mining
+
+**Business Applications**
+- Segment-specific retention and growth strategies
+- Risk-tiered churn playbooks
+- Product cross-sell and upsell recommendations
+- Executive business health summary (revenue concentration risk, top performers)
 
 ---
 
-## 🔬 Theoretical Foundations & Methodology
+## 🔬 Methodology
 
-### 1. Data Preprocessing & Validation
-Raw e-commerce transaction data frequently suffers from formatting inconsistencies, system cancellations, and missing attribution.
-- **Filtering Negative Values**: Quantities with negative values correspond to cancelled or returned orders (`InvoiceNo` starting with 'C'). These were removed to establish accurate net revenue values.
-- **Missing Customer IDs**: Rows missing `CustomerID` cannot be attributed to specific historical accounts and are excluded from customer-level RFM modeling.
-- **Price Anomaly Removal**: Transactions with zero or negative `UnitPrice` (e.g., administrative write-offs or system tests) were filtered out.
+### 1. Data Cleaning & Validation
+
+Raw transaction data is loaded, validated against an expected schema, and cleaned: duplicates removed, missing descriptions and customer IDs dropped, invalid (non-positive) prices filtered, and cancelled orders flagged. The pipeline then derives the full canonical schema in one pass — `Revenue`, and the time-based features `Year`, `Month`, `MonthName`, `Day`, `DayName`, `Hour`, `Quarter`, `DayOfWeek`, `Week`, `IsWeekend`, and `TimeOfDay` — producing a single reproducible dataset (`final_cleaned_dataset.csv`) that every later phase and every dashboard page reads from.
 
 ### 2. Feature Engineering & RFM Modeling
-Customer behavior is summarized into a tabular feature set via the **Recency, Frequency, and Monetary (RFM)** framework:
 
-$$\text{Recency (R)} = T_{\text{analysis}} - \max(T_{\text{customer\_purchase}})$$
-
-$$\text{Frequency (F)} = \vert{}\{ \text{Unique Invoices per Customer} \}\vert{}$$
-
-$$\text{Monetary (M)} = \sum (\text{Quantity} \times \text{UnitPrice})$$
-
-Additional derived features include:
-- **Average Order Value (AOV)**: $\frac{\text{Monetary}}{\text{Frequency}}$
-- **Purchase Variety**: Count of unique product SKUs purchased (`StockCode`).
+Per-customer features are built on top of the cleaned transactions: **Recency** (days since last purchase), **Frequency** (number of distinct orders), and **Monetary** (total spend), plus supporting features like average order revenue and unique products purchased. These RFM features are the foundation for every model downstream.
 
 ### 3. Customer Segmentation (K-Means Clustering)
-- **Feature Scaling**: Due to the skewed nature of financial datasets, RFM metrics are log-transformed to normalize distributions and then scaled using `StandardScaler`:
 
-  $$x' = \frac{\ln(x + 1) - \mu}{\sigma}$$
-
-- **K-Means Optimization**: The optimal number of clusters ($k$) is evaluated using the **Elbow Method** (minimizing Within-Cluster Sum of Squares) and verified using the **Silhouette Coefficient**:
-
-  $$s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}$$
-
-  *where $a(i)$ is the mean intra-cluster distance and $b(i)$ is the mean nearest-cluster distance.*
+Customers are grouped into **4 behavioral segments** using K-Means clustering on standardized RFM features, with cluster count selected via the elbow method and validated with silhouette analysis.
 
 ### 4. Customer Lifetime Value (CLV) Prediction
-Predicting future monetary spend over an extended horizon is framed as a supervised regression task.
-- **Target Formulation**: Future monetary total over a target evaluation window.
-- **Supervised Regression Pipeline**: Scaled behavioral inputs are trained using Scikit-Learn regression models (e.g., Linear Regression, Ridge, Random Forest) to output expected continuous values.
-- **Evaluation Metrics**: Models are evaluated using Mean Absolute Error (MAE) and Root Mean Squared Error (RMSE):
 
-  $$\text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$$
+A regression model predicts each customer's future value from their RFM and purchase-behavior features. Several algorithms were benchmarked; **Gradient Boosting** was selected as the best-performing model.
 
-### 5. Churn Risk Analytics
-A customer is classified as **Churned** if their inactivity period exceeds a specific recency threshold relative to standard purchase cycles.
-- **Binary Target**: 
-  $$\text{Churn} = \begin{cases} 1 & \text{if Recency} > \text{Threshold} \\ 0 & \text{otherwise} \end{cases}$$
-- **Classification Modeling**: Probability outputs $P(\text{Churn}=1\vert{}\mathbf{X})$ are generated using supervised models (e.g., Logistic Regression, Gradient Boosting/Random Forests).
-- **Risk Stratification**:
-  - 🟢 **Low Risk**: $P(\text{Churn}) < 0.35$
-  - 🟡 **Medium Risk**: $0.35 \le P(\text{Churn}) < 0.70$
-  - 🔴 **High Risk**: $P(\text{Churn}) \ge 0.70$
+### 5. Churn Prediction
+
+A classification model estimates each customer's probability of churning based on recency, frequency, and engagement features. **Gradient Boosting** was again the top performer here, evaluated with a full confusion matrix and ROC curve.
 
 ### 6. Hybrid Recommendation System
-The recommendation engine combines multiple recommendation approaches:
-- **Popularity Engine**: Baseline top-seller ranking by order count and gross revenue.
-- **Item-Item Cosine Similarity**: Measures similarity between product vector representations $u$ and $v$:
 
-  $$\text{Cosine Similarity}(u, v) = \frac{u \cdot v}{\Vert{}u\Vert{}_2 \Vert{}v\Vert{}_2}$$
+Three independent recommendation strategies were built and evaluated side by side:
 
-- **User-Based Collaborative Filtering**: Identifies $K$-nearest neighbor accounts with similar historical item choices.
-- **Hybrid Blending**: Combines user preference scores and product similarity matrices to mitigate cold-start issues and maximize recommendation accuracy.
+- **Popularity Ranking** — ranks products by purchase volume and revenue; works even for new customers with no history.
+- **Customer Collaborative Filtering** — finds customers with similar purchase behavior and recommends what those "neighbors" bought.
+- **Item-Item Similarity** — finds products frequently purchased together, supported by association rule mining.
 
----
-
-## 📊 Dataset Characteristics
-
-The project uses the public **Online Retail II dataset** (UK-based e-commerce store).
-
-| Attribute | Summary Specification |
-| :--- | :--- |
-| **Domain** | Non-store Online Retail / E-Commerce |
-| **Total Order Records** | 500,000+ Records |
-| **Active Customer Accounts** | 5,900+ Unique IDs |
-| **Product Catalog** | 4,000+ Distinct SKUs |
-| **Global Reach** | 38 Geographic Countries |
-| **Raw Schema Attributes** | `Invoice`, `StockCode`, `Description`, `Quantity`, `InvoiceDate`, `Price`, `Customer ID`, `Country` |
+The dashboard's Recommendation System page also blends similarity and popularity scores into a hybrid ranking for a given product.
 
 ---
 
-## 🖥 Dashboard Page Guide
+## 📊 Model Results
 
-| Page View | Content & Analytical Features | Primary Audience |
-| :--- | :--- | :--- |
-| **1. Home** | Architectural pipeline flow, project summary, tech badges, and repository guide | General / Evaluators |
-| **2. Data Overview** | Interactive top-level KPIs, revenue trends over time, geographical maps, dynamic tables | Business Analysts |
-| **3. Customer Segmentation** | RFM cluster distribution, 2D/3D scatter plots, profile centroids, and segment strategies | CRM & Marketing Teams |
-| **4. CLV Prediction** | Predicted vs. actual CLV plots, value tiers (**High/Medium/Low**), interactive custom CLV calculator | Finance & Revenue Teams |
-| **5. Churn Prediction** | Risk distribution charts, high-risk customer lookup tables, interactive churn estimator, retention guides | Customer Retention Teams |
-| **6. Recommendation Engine** | Trending items list, customer collaborative recommendations, item-item similarity explorer | Product & Merchandising |
-| **7. Business Insights** | Revenue concentration analytics, segment share breakdowns, strategic health metrics | C-Suite & Executives |
-| **8. About** | Deep-dive methodology, system dependencies, model parameters, and contact links | Engineering & ML Leads |
+| Model | Metric | Value |
+|---|---|---|
+| **Customer Segmentation** | Clusters | 4 |
+| | Silhouette Score | 0.229 |
+| **CLV Prediction** | Best Model | Gradient Boosting |
+| | MAE | 173.17 |
+| | RMSE | 479.67 |
+| **Churn Prediction** | Best Model | Gradient Boosting |
+| | Accuracy | 99.49% |
+| | Precision / Recall / F1 | 0.9949 |
+| | ROC-AUC | 0.9997 |
+
+> **Note on CLV performance:** the current CLV regressor's R² is close to zero, meaning it isn't yet meaningfully outperforming a naive average-based prediction on held-out data. This is called out honestly here rather than hidden — see [Known Limitations](#-known-limitations--roadmap) for planned improvements. The churn model's near-perfect scores are also worth a second look before treating them as production-ready — extremely high classification metrics like this can sometimes indicate the model has (indirect) access to information that wouldn't be available at prediction time in a real deployment, so it's worth double-checking the feature set for that before relying on these numbers operationally.
+
+Full metrics, confusion matrices, ROC curves, and feature importance charts are versioned in `artifacts/` and `reports/figures/`.
+
+---
+
+## 📂 Dataset
+
+The **Online Retail II** dataset contains real transactional records from a UK-based online retailer.
+
+| Attribute | Value |
+|---|---|
+| Domain | E-Commerce |
+| Customers | 5,900+ |
+| Cleaned Transactions | 797,815 |
+| Products | 4,000+ |
+| Countries | 38 |
+
+**Raw fields:** Invoice, StockCode, Description, Quantity, InvoiceDate, Price, Customer ID, Country.
+
+**Canonical processed schema** (`data/processed/final_cleaned_dataset.csv`): `InvoiceNo, StockCode, Description, Quantity, InvoiceDate, UnitPrice, CustomerID, Country, IsCancelled, Revenue, Year, Month, MonthName, Day, DayName, Hour, Quarter, DayOfWeek, Week, IsWeekend, TimeOfDay`.
+
+---
+
+## 🖥 Dashboard Pages
+
+| Page | What It Shows |
+|---|---|
+| **Home** | Project introduction, completed phases, platform architecture |
+| **Data Overview** | Dataset KPIs, revenue/quantity trends, top countries & products, time-based patterns |
+| **Customer Segmentation** | Segment distribution, RFM comparison, customer value map, segment leaderboard, business recommendations per segment |
+| **CLV Prediction** | Actual vs. predicted CLV, value categories (High/Medium/Low), top customers, a quick CLV estimator |
+| **Churn Prediction** | Churn risk categories, probability distribution, top at-risk customers, retention playbook |
+| **Recommendation System** | Most popular products, customer-specific recommendations, product similarity explorer, hybrid recommendation preview |
+| **Business Insights** | Executive KPIs, revenue by segment/country/product, business health summary, strategic recommendations |
+| **About** | Project objectives, pipeline, tech stack, and project structure |
+
+Every chart and table is computed live from the project's own processed data.
 
 ---
 
 ## 🛠 Tech Stack
 
-- **Programming Language**: Python 3.11+
-- **Data Engineering**: Pandas, NumPy
-- **Machine Learning & Modeling**: Scikit-Learn
-- **Data Visualization**: Plotly, Matplotlib, Seaborn
-- **Dashboard Web Framework**: Streamlit
-- **Version Control & Repository**: Git, GitHub
+| Category | Technology |
+|---|---|
+| Language | Python 3.12 |
+| Data Processing | Pandas, NumPy |
+| Machine Learning | Scikit-learn, XGBoost, LightGBM |
+| Visualization | Plotly, Matplotlib, Seaborn |
+| Dashboard | Streamlit |
+| Utilities | SciPy, Joblib, OpenPyXL, Pillow |
+| Deployment | Streamlit Community Cloud |
 
 ---
 
-## 📁 Project Directory Structure
+## 📁 Project Structure
 
-```text
+```
 Intelligent-Customer-Analytics-Platform/
 │
-├── assets/                        # Diagrams, architectural flowcharts, UI icons
-│   ├── banner.png
-│   ├── logo.png
-│   └── workflow.png
+├── config/
+│   ├── config.py                  # Column names, thresholds, constants
+│   └── paths.py                   # Centralized path definitions
 │
-├── dashboard/                     # Multi-page Streamlit Application
-│   ├── app.py                     # Primary Streamlit Entry Point
-│   ├── pages/                     # Dedicated Sub-pages
-│   │   ├── 1_Home.py
-│   │   ├── 2_Data_Overview.py
-│   │   ├── 3_Customer_Segmentation.py
-│   │   ├── 4_CLV_Prediction.py
-│   │   ├── 5_Churn_Prediction.py
-│   │   ├── 6_Recommendation_System.py
-│   │   ├── 7_Business_Insights.py
-│   │   └── 8_About.py
-│   ├── styles/                    # Visual Styling Assets
-│   │   └── style.css               # Streamlit Theme Custom CSS
-│   └── utils/                     # Data Loaders & Helper Scripts
-│       ├── cache.py               # Streamlit Cache Optimizers
-│       ├── config.py              # Path Definitions & System Settings
-│       ├── data_loader.py         # CSV & Pipeline Loaders
-│       └── helper.py              # Currency & Number Formatting Helpers
+├── data/
+│   ├── processed/                 # final_cleaned_dataset.csv, features, segments, predictions
+│   └── recommendation/            # Popularity, collaborative & item-similarity outputs
 │
-├── data/                          # Structured Data Storage
-│   ├── raw/                       # Original Raw Transaction Dataset
-│   ├── processed/                 # Cleaned Datasets & Feature Sets
-│   └── recommendation/            # Precomputed Recommendation Matrices
+├── src/
+│   ├── data/                      # loader.py, validator.py, cleaner.py, pipeline.py
+│   ├── features/                  # churn_features.py
+│   ├── models/                    # train_churn.py, predict_churn.py
+│   ├── recommendation/            # popularity, collaborative, item-similarity, hybrid pipeline
+│   └── utils/                     # model_utils.py
 │
-├── models/                        # Serialized Model Artifacts
-│   ├── churn_model.pkl            # Supervised Churn Classifier
-│   ├── churn_scaler.pkl           # Churn Feature Scaler
-│   ├── clv_model.pkl              # Supervised CLV Regressor
-│   └── clv_scaler.pkl             # CLV Feature Scaler
+├── notebooks/
+│   ├── 01_Data_Understanding.ipynb
+│   ├── 02_Data_Cleaning.ipynb
+│   ├── 03_exploratory_data_analysis.ipynb
+│   ├── 04_Feature_Engineering.ipynb
+│   ├── 05_Customer_Segmentation.ipynb
+│   ├── 06_Customer_Lifetime_Value_Prediction.ipynb
+│   ├── 07_customer_churn_prediction.ipynb
+│   └── 08_Recommendation_System/  # Product analysis → hybrid pipeline, 6 notebooks
 │
-├── reports/                       # Visual Artifact Exports
-│   └── figures/                   # Exported Visual Analytics Plots
+├── models/                        # clv_model.pkl, clv_scaler.pkl, churn_model.pkl, churn_scaler.pkl
 │
-├── .gitignore
-├── LICENSE                        # Open-Source License
-├── README.md                      # Platform Documentation
-└── requirements.txt               # System Dependencies
+├── artifacts/                     # Per-phase metrics: segmentation, clv, churn, recommendation
+│
+├── reports/
+│   ├── documentation/             # Phase-by-phase written reports, business problem, data dictionary
+│   └── figures/                   # 35+ exported charts (EDA, model evaluation, etc.)
+│
+├── dashboard/
+│   ├── app.py                     # Streamlit entry point
+│   ├── pages/                     # 1_Home.py ... 8_About.py
+│   ├── components/                # charts, metrics, prediction, recommendation, sidebar
+│   ├── utils/                     # config, cache, data_loader, artifact_loader, helper
+│   └── styles/                    # style.css
+│
+├── tests/
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## ⚙️ Getting Started
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/<your-username>/intelligent-customer-analytics-platform.git
+cd intelligent-customer-analytics-platform
+```
+
+**2. Create a virtual environment**
+
+```bash
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# macOS / Linux
+source venv/bin/activate
+```
+
+**3. Install dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+**4. (Re)generate the canonical dataset from raw data, if needed**
+
+```bash
+jupyter notebook notebooks/02_Data_Cleaning.ipynb
+```
+
+Running the pipeline (`DataPipeline().run()`) produces `data/processed/final_cleaned_dataset.csv` — the single dataset every later notebook and every dashboard page reads from.
+
+**5. Run the dashboard**
+
+```bash
+streamlit run dashboard/app.py
+```
+
+The dashboard opens at `http://localhost:8501`. Or skip all of this and just use the **[live deployed version](https://intelligent-customer-analytics-platform-rjpaaejbalwimmv6xhvwen.streamlit.app/)**.
+
+---
+
+## 💼 Business Impact
+
+**Who are our best customers?**
+Answered through customer segmentation and CLV prediction, which rank customers by predicted long-term value.
+
+**Who is about to leave?**
+Answered through the churn model, which flags customers by churn probability so retention effort goes where it matters.
+
+**What should we recommend?**
+Answered through three independent recommendation engines blended into a hybrid ranking.
+
+**Where is revenue coming from?**
+Answered through the Data Overview and Business Insights pages, breaking revenue down by country, product, and time.
+
+---
+
+## 🚧 Known Limitations & Roadmap
+
+Being upfront about the current state of the models:
+
+- **CLV regression** currently has an R² near zero on held-out data — it isn't yet clearly better than predicting the average CLV for everyone. Next steps: richer behavioral features, log-transforming the heavily skewed CLV target, and testing XGBoost/LightGBM against the current Gradient Boosting baseline.
+- **Churn classification** metrics (99.5% accuracy, 0.9997 ROC-AUC) are unusually high and should be stress-tested — worth auditing the feature set for anything that could be leaking the target (e.g., a feature that's only knowable *after* churn has already happened) before treating this as production-ready.
+- **Recommendation evaluation** artifacts exist (`artifacts/recommendation/evaluation_metrics.csv`) but aren't yet populated with headline numbers in this README — worth adding once formal offline evaluation (precision@k, recall@k) is finalized.
+
+**Planned next steps:**
+- Deploy a FastAPI backend for real-time predictions instead of static CSV outputs
+- Add model monitoring and drift detection
+- Add an authentication layer for internal use
+- Automate report regeneration on a schedule
+- Add a proper `LICENSE` file (not yet included in this repository)
+
+---
+
+## 👨‍💻 Author
+
+**Arin Bhardwaj**
+M.Sc. Mathematics and Scientific Computing, NIT Warangal
+
+**Project:** Intelligent Customer Analytics Platform
+**Live App:** [intelligent-customer-analytics-platform-rjpaaejbalwimmv6xhvwen.streamlit.app](https://intelligent-customer-analytics-platform-rjpaaejbalwimmv6xhvwen.streamlit.app/)
+
+---
+
+*Built with Python, Scikit-learn, XGBoost, Streamlit, and Plotly.*
