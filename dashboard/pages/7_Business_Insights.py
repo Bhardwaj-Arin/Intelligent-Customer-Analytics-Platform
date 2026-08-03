@@ -23,9 +23,29 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from pathlib import Path
+
 from utils.cache import load_csv
 from utils.config import PROCESSED_DATA_DIR
 from utils.helper import format_currency
+
+
+def _file_fingerprint(file_path):
+    """
+    A small fingerprint (last-modified time + size) used to bust
+    the cache below automatically if the underlying CSV changes
+    on disk without the app process itself restarting.
+    """
+
+    path = Path(file_path)
+
+    if not path.exists():
+        return "missing"
+
+    file_stats = path.stat()
+
+    return f"{file_stats.st_mtime_ns}-{file_stats.st_size}"
+
 
 # ==========================================================
 # LOAD DATA (MEMORY-OPTIMIZED)
@@ -41,7 +61,7 @@ from utils.helper import format_currency
 
 
 @st.cache_data(show_spinner=False)
-def load_sales_data():
+def _load_sales_data_cached(_fingerprint):
 
     dtype_map = {
         "Quantity": "int32",
@@ -68,8 +88,13 @@ def load_sales_data():
     return pd.read_csv(file_path, dtype=usable_dtypes)
 
 
+def load_sales_data():
+    file_path = PROCESSED_DATA_DIR / "final_cleaned_dataset.csv"
+    return _load_sales_data_cached(_file_fingerprint(file_path))
+
+
 @st.cache_data(show_spinner=False)
-def load_customer_features_optimized():
+def _load_customer_features_cached(_fingerprint):
 
     dtype_map = {
         "CustomerID": "int32",
@@ -93,8 +118,13 @@ def load_customer_features_optimized():
     return pd.read_csv(file_path, dtype=usable_dtypes)
 
 
+def load_customer_features_optimized():
+    file_path = PROCESSED_DATA_DIR / "customer_features.csv"
+    return _load_customer_features_cached(_file_fingerprint(file_path))
+
+
 @st.cache_data(show_spinner=False)
-def load_customer_segments_optimized():
+def _load_customer_segments_cached(_fingerprint):
 
     dtype_map = {
         "CustomerID": "int32",
@@ -121,11 +151,94 @@ def load_customer_segments_optimized():
     return pd.read_csv(file_path, dtype=usable_dtypes)
 
 
-sales_df = load_sales_data()
+def load_customer_segments_optimized():
+    file_path = PROCESSED_DATA_DIR / "customer_segments.csv"
+    return _load_customer_segments_cached(_file_fingerprint(file_path))
 
-customer_df = load_customer_features_optimized()
 
-segment_df = load_customer_segments_optimized()
+REQUIRED_SALES_COLUMNS = [
+    "CustomerID",
+    "InvoiceNo",
+    "StockCode",
+    "Description",
+    "Revenue",
+    "Quantity",
+    "Country",
+]
+
+
+def require_dataset(loader_function, file_name, required_columns):
+    """
+    Load a dataset with a clear, actionable error instead of a
+    raw traceback if the file is missing or malformed.
+
+    On Streamlit Cloud specifically, a FileNotFoundError almost
+    always means the data/ folder wasn't deployed with the app
+    (excluded by .gitignore, over a size limit, or tracked with
+    Git LFS, which Streamlit Cloud does not fetch by default). A
+    KeyError on the expected columns usually means the file that
+    was loaded isn't the real dataset - for example, a Git LFS
+    pointer file being read instead of the actual CSV.
+    """
+
+    try:
+
+        dataset = loader_function()
+
+    except FileNotFoundError:
+
+        st.error(
+            f"**Could not find `{file_name}`.**\n\n"
+            f"This usually means the `data/processed/` folder was not "
+            f"deployed with the app — check that it's committed to your "
+            f"repository, isn't excluded by `.gitignore`, and isn't over "
+            f"your hosting provider's file size limit (Git LFS files in "
+            f"particular are not fetched by Streamlit Cloud by default)."
+        )
+
+        st.stop()
+
+        return None
+
+    missing_columns = [
+        column for column in required_columns if column not in dataset.columns
+    ]
+
+    if missing_columns:
+
+        st.error(
+            f"**`{file_name}` was loaded, but is missing expected columns: "
+            f"{', '.join(missing_columns)}.**\n\n"
+            f"This almost always means the file that was loaded isn't the "
+            f"real dataset — for example, a Git LFS pointer file being "
+            f"read instead of the actual CSV. Found columns instead: "
+            f"{', '.join(dataset.columns.tolist())}."
+        )
+
+        st.stop()
+
+        return None
+
+    return dataset
+
+
+sales_df = require_dataset(
+    load_sales_data,
+    "final_cleaned_dataset.csv",
+    REQUIRED_SALES_COLUMNS,
+)
+
+customer_df = require_dataset(
+    load_customer_features_optimized,
+    "customer_features.csv",
+    ["CustomerID", "Country", "Frequency", "Monetary", "AvgRevenue", "UniqueProducts"],
+)
+
+segment_df = require_dataset(
+    load_customer_segments_optimized,
+    "customer_segments.csv",
+    ["CustomerID", "CustomerSegment", "Monetary", "Frequency", "AvgRevenue"],
+)
 
 # ==========================================================
 # PAGE HEADER

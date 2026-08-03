@@ -24,10 +24,65 @@ from utils.data_loader import load_cleaned_data
 from utils.helper import format_currency, format_number
 
 # ==========================================================
-# LOAD DATA
+# LOAD DATA (WITH A CLEAR DIAGNOSTIC IF SOMETHING'S WRONG)
 # ==========================================================
+#
+# If this fails, it is almost always a deployment issue, not a
+# bug in this page: either the processed CSV files were not
+# committed to the repository, they exceed a hosting size limit,
+# or they are tracked with Git LFS (which Streamlit Cloud does
+# not fetch by default, leaving only a small pointer file behind
+# instead of the real data).
 
-df = load_cleaned_data()
+REQUIRED_COLUMNS = [
+    "CustomerID",
+    "InvoiceNo",
+    "StockCode",
+    "Description",
+    "Quantity",
+    "Revenue",
+    "Country",
+    "Year",
+    "Month",
+    "MonthName",
+    "DayName",
+    "TimeOfDay",
+    "IsWeekend",
+]
+
+try:
+
+    df = load_cleaned_data()
+
+except FileNotFoundError:
+
+    st.error(
+        "**Could not find `final_cleaned_dataset.csv`.**\n\n"
+        "This usually means the `data/processed/` folder was not "
+        "deployed with the app — check that it's committed to your "
+        "repository, isn't excluded by `.gitignore`, and isn't over "
+        "your hosting provider's file size limit (Git LFS files in "
+        "particular are not fetched by Streamlit Cloud by default)."
+    )
+
+    st.stop()
+
+missing_columns = [
+    column for column in REQUIRED_COLUMNS if column not in df.columns
+]
+
+if missing_columns:
+
+    st.error(
+        f"**The dataset was loaded, but is missing expected columns: "
+        f"{', '.join(missing_columns)}.**\n\n"
+        f"This almost always means the file that was loaded isn't the "
+        f"real dataset — for example, a Git LFS pointer file being "
+        f"read instead of the actual CSV. Found columns instead: "
+        f"{', '.join(df.columns.tolist())}."
+    )
+
+    st.stop()
 
 DAY_ORDER = [
     "Monday",

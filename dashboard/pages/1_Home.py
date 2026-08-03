@@ -1,7 +1,19 @@
-import base64
-from pathlib import Path
+"""
+Home Page
+-------------------------------------------------------------
 
-import numpy as np
+The landing page of the Intelligent Customer Analytics Platform.
+Gives a quick executive snapshot of the dataset, the completed
+project phases, and the platform's architecture.
+
+Every number on this page is computed directly from the
+project's own cleaned dataset via load_cleaned_data(). No
+external data, images, or text is used anywhere on this page.
+
+Author: Arin Bhardwaj
+Project: Intelligent Customer Analytics Platform
+"""
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -10,355 +22,525 @@ import streamlit as st
 from utils.data_loader import load_cleaned_data
 from utils.helper import format_currency
 
-# ==========================================================
-# 1. PAGE CONFIGURATION
-# ==========================================================
 st.set_page_config(
-    page_title="Home | Intelligent Customer Analytics Platform",
+    page_title="Intelligent Customer Analytics Platform",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # ==========================================================
-# 2. DATA LOADING & GLOBAL METRICS
+# LOAD DATA (WITH A CLEAR DIAGNOSTIC IF SOMETHING'S WRONG)
 # ==========================================================
-@st.cache_data(show_spinner=False)
-def load_home_data():
-    data = load_cleaned_data()
-    data["InvoiceDate"] = pd.to_datetime(data["InvoiceDate"])
-    return data
+#
+# If this fails, it is almost always a deployment issue, not a
+# bug in this page: either the processed CSV files were not
+# committed to the repository, they exceed a hosting size limit,
+# or they are tracked with Git LFS (which Streamlit Cloud does
+# not fetch by default, leaving only a small pointer file behind
+# instead of the real data).
 
-df = load_home_data()
+REQUIRED_COLUMNS = [
+    "CustomerID",
+    "InvoiceNo",
+    "StockCode",
+    "Description",
+    "Quantity",
+    "Revenue",
+    "Country",
+]
 
-TOTAL_CUSTOMERS = df["CustomerID"].nunique()
-TOTAL_TRANSACTIONS = df["InvoiceNo"].nunique()
-TOTAL_PRODUCTS = df["StockCode"].nunique()
-TOTAL_COUNTRIES = df["Country"].nunique()
-TOTAL_REVENUE = float(df["Revenue"].sum())
-AVG_ORDER_VALUE = TOTAL_REVENUE / TOTAL_TRANSACTIONS if TOTAL_TRANSACTIONS > 0 else 0
+try:
 
-TOTAL_PHASES = 9
-COMPLETED_PHASES = 9
-PROJECT_PROGRESS = 100
-TOTAL_MODELS = 8
-TOTAL_DASHBOARDS = 8
+    df = load_cleaned_data()
+
+except FileNotFoundError:
+
+    st.error(
+        "**Could not find `final_cleaned_dataset.csv`.**\n\n"
+        "This usually means the `data/processed/` folder was not "
+        "deployed with the app — check that it's committed to your "
+        "repository, isn't excluded by `.gitignore`, and isn't over "
+        "your hosting provider's file size limit (Git LFS files in "
+        "particular are not fetched by Streamlit Cloud by default)."
+    )
+
+    st.stop()
+
+missing_columns = [
+    column for column in REQUIRED_COLUMNS if column not in df.columns
+]
+
+if missing_columns:
+
+    st.error(
+        f"**The dataset was loaded, but is missing expected columns: "
+        f"{', '.join(missing_columns)}.**\n\n"
+        f"This almost always means the file that was loaded isn't the "
+        f"real dataset — for example, a Git LFS pointer file being "
+        f"read instead of the actual CSV. Found columns instead: "
+        f"{', '.join(df.columns.tolist())}."
+    )
+
+    st.stop()
 
 # ==========================================================
-# 3. HERO BANNER & PROJECT STATUS
+# BUSINESS METRICS
 # ==========================================================
-st.markdown(
-    """
-    <div style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); padding: 30px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #334155;">
-        <span style="background-color: #0284C7; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; letter-spacing: 1px;">
-            🚀 PROJECT COMPLETED • END-TO-END MACHINE LEARNING PLATFORM
-        </span>
-        <h1 style="color: #F8FAFC; margin-top: 15px; margin-bottom: 10px; font-size: 36px;">
-            Intelligent Customer Analytics Platform
-        </h1>
-        <p style="color: #94A3B8; font-size: 16px; line-height: 1.6; max-width: 900px;">
-            Transforming raw retail transaction data into actionable business intelligence, customer segmentation, CLV prediction, churn prediction, and AI-powered recommendation systems through a single unified analytics dashboard.
-        </p>
-        <div style="margin-top: 20px; color: #38BDF8; font-size: 14px; font-weight: 500;">
-            ✔ 9 Project Phases Completed &nbsp;&nbsp;•&nbsp;&nbsp;
-            ✔ Interactive Business Dashboard &nbsp;&nbsp;•&nbsp;&nbsp;
-            ✔ 8 Machine Learning Models &nbsp;&nbsp;•&nbsp;&nbsp;
-            ✔ End-to-End Retail Workflow
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True,
+
+total_customers = df["CustomerID"].nunique()
+
+total_transactions = df["InvoiceNo"].nunique()
+
+total_products = df["StockCode"].nunique()
+
+total_revenue = df["Revenue"].sum()
+
+total_countries = df["Country"].nunique()
+
+avg_order_value = (
+    total_revenue / total_transactions if total_transactions > 0 else 0
 )
 
-hero_left, hero_right = st.columns([1.8, 1])
+# ==========================================================
+# HERO SECTION
+# ==========================================================
 
-with hero_left:
-    st.markdown(
-        """
-        ### 📖 Executive Platform Summary
-        The **Intelligent Customer Analytics Platform** was engineered to simulate a real-world enterprise retail solution.
-        
-        Instead of treating Machine Learning as isolated algorithms, this platform connects every stage of the Data Science lifecycle—from raw transaction ingestion, data validation, and feature engineering to predictive modeling, churn risk mitigation, product recommendation, and executive KPI reporting.
-        """
-    )
+st.title("📊 Intelligent Customer Analytics Platform")
 
-with hero_right:
-    fig_gauge = go.Figure(
-        go.Indicator(
-            mode="gauge+number",
-            value=PROJECT_PROGRESS,
-            number={"suffix": "%"},
-            gauge={
-                "axis": {"range": [0, 100]},
-                "bar": {"color": "#38BDF8"},
-                "steps": [
-                    {"range": [0, 25], "color": "#0F172A"},
-                    {"range": [25, 50], "color": "#1E293B"},
-                    {"range": [50, 75], "color": "#334155"},
-                    {"range": [75, 100], "color": "#0284C7"},
-                ],
-            },
-            title={"text": "Project Completion Status"},
-        )
-    )
+st.markdown(
+    """
+This platform was built to simulate a real-world retail analytics
+solution used by modern organizations.
 
-    fig_gauge.update_layout(
-        height=220,
-        margin=dict(l=10, r=10, t=30, b=10),
-        paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="white"),
-    )
-    st.plotly_chart(fig_gauge, use_container_width=True, key="home_hero_gauge_chart")
+Instead of focusing on a single Machine Learning model, it
+integrates multiple analytics modules into one centralized
+dashboard — taking raw customer transaction data through
+cleaning, feature engineering, predictive modelling, and
+customer intelligence, all the way to an executive business
+dashboard.
+
+The objective: help business stakeholders understand customer
+behaviour, predict future outcomes, identify valuable customers,
+reduce churn, and recommend relevant products.
+"""
+)
 
 st.divider()
 
 # ==========================================================
-# 4. EXECUTIVE BUSINESS OVERVIEW METRICS
+# KPI OVERVIEW
 # ==========================================================
-st.subheader("📊 Executive Business Overview")
-st.markdown("A macro snapshot of the retail transaction dataset powering the intelligence platform.")
 
-kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
+st.header("📌 Platform at a Glance")
 
-with kpi1:
-    st.metric("Total Revenue", format_currency(TOTAL_REVENUE), delta="Cleaned Baseline")
-with kpi2:
-    st.metric("Total Orders", f"{TOTAL_TRANSACTIONS:,}")
-with kpi3:
-    st.metric("Unique Customers", f"{TOTAL_CUSTOMERS:,}")
-with kpi4:
-    st.metric("Avg Order Value", format_currency(AVG_ORDER_VALUE))
-with kpi5:
-    st.metric("Global Markets", f"{TOTAL_COUNTRIES} Countries")
+k1, k2, k3, k4 = st.columns(4)
 
-st.markdown("<br>", unsafe_allow_html=True)
+with k1:
 
-# ==========================================================
-# 5. COMPLETED PROJECT PHASES GRID
-# ==========================================================
-st.subheader("📂 Completed Project Lifecycle Phases")
-st.markdown("Every phase of the project followed an industry-standard Machine Learning pipeline.")
+    st.metric(
+        "Customers",
+        f"{total_customers:,}",
+    )
 
-p_col1, p_col2, p_col3 = st.columns(3)
+with k2:
 
-with p_col1:
-    st.success("✅ **Phase 1**: Business Understanding")
-    st.success("✅ **Phase 2**: Data Cleaning & Pipeline")
-    st.success("✅ **Phase 3**: Exploratory Data Analysis")
+    st.metric(
+        "Transactions",
+        f"{total_transactions:,}",
+    )
 
-with p_col2:
-    st.success("✅ **Phase 4**: Feature Engineering & RFM")
-    st.success("✅ **Phase 5**: Customer Segmentation")
-    st.success("✅ **Phase 6**: CLV Regression Models")
+with k3:
 
-with p_col3:
-    st.success("✅ **Phase 7**: Churn Risk Prediction")
-    st.success("✅ **Phase 8**: Product Recommendation Engine")
-    st.success("✅ **Phase 9**: Interactive Streamlit Platform")
+    st.metric(
+        "Products",
+        f"{total_products:,}",
+    )
+
+with k4:
+
+    st.metric(
+        "Countries",
+        f"{total_countries:,}",
+    )
+
+k5, k6 = st.columns(2)
+
+with k5:
+
+    st.metric(
+        "Total Revenue",
+        format_currency(total_revenue),
+    )
+
+with k6:
+
+    st.metric(
+        "Avg Order Value",
+        format_currency(avg_order_value),
+    )
 
 st.divider()
 
 # ==========================================================
-# 6. PLATFORM WORKFLOW FUNNEL
+# PROJECT COMPLETION GAUGE
 # ==========================================================
-st.subheader("⚙️ End-to-End Machine Learning Workflow")
-st.markdown("Visualization of the sequential Data Science lifecycle implemented in this platform.")
+
+st.header("🎯 Project Completion")
+
+total_phases = 9
+
+completed_phases = 9
+
+project_progress = round((completed_phases / total_phases) * 100)
+
+fig_gauge = go.Figure(
+    go.Indicator(
+        mode="gauge+number",
+        value=project_progress,
+        number={"suffix": "%"},
+        gauge={
+            "axis": {"range": [0, 100]},
+            "bar": {"color": "#3b82f6"},
+            "steps": [
+                {"range": [0, 50], "color": "#1e293b"},
+                {"range": [50, 100], "color": "#334155"},
+            ],
+        },
+    )
+)
+
+fig_gauge.update_layout(
+    height=300,
+    margin=dict(l=20, r=20, t=30, b=10),
+    paper_bgcolor="rgba(0,0,0,0)",
+    font=dict(color="white"),
+)
+
+st.plotly_chart(
+    fig_gauge,
+    use_container_width=True,
+)
+
+st.divider()
+
+# ==========================================================
+# COMPLETED PROJECT PHASES
+# ==========================================================
+
+st.header("📂 Completed Project Phases")
+
+st.caption(
+    "Every phase of this project has been completed following an "
+    "industry-standard Machine Learning workflow."
+)
+
+phase_names = [
+    "Business Understanding",
+    "Data Cleaning Pipeline",
+    "Exploratory Data Analysis",
+    "Feature Engineering",
+    "Customer Segmentation",
+    "Customer Lifetime Value Prediction",
+    "Customer Churn Prediction",
+    "Recommendation System",
+    "Interactive Streamlit Dashboard",
+]
+
+phase_columns = st.columns(3)
+
+for index, phase_name in enumerate(phase_names):
+
+    with phase_columns[index % 3]:
+
+        st.success(f"✅ Phase {index + 1}\n\n**{phase_name}**")
+
+st.divider()
+
+# ==========================================================
+# END-TO-END WORKFLOW
+# ==========================================================
+
+st.header("⚙️ End-to-End Machine Learning Workflow")
+
+st.caption(
+    "The project follows a complete industry-standard Data Science "
+    "lifecycle, from raw transactional data to intelligent business "
+    "recommendations."
+)
 
 workflow_df = pd.DataFrame(
     {
-        "Phase": [
-            "1. Business Understanding",
-            "2. Data Ingestion & Cleaning",
-            "3. Exploratory Data Analysis",
-            "4. Feature Engineering",
-            "5. Customer Segmentation",
-            "6. CLV Prediction",
-            "7. Churn Risk Modeling",
-            "8. Recommendation Engine",
-            "9. Executive Dashboard",
+        "Stage": [
+            "Business Understanding",
+            "Data Cleaning",
+            "EDA",
+            "Feature Engineering",
+            "Segmentation",
+            "CLV",
+            "Churn",
+            "Recommendation",
+            "Dashboard",
         ],
         "Completion": [100] * 9,
     }
 )
 
-fig_funnel = go.Figure(
-    go.Funnel(
-        y=workflow_df["Phase"],
-        x=workflow_df["Completion"],
-        textinfo="value+label",
-        marker=dict(
-            color=[
-                "#E0F2FE",
-                "#BAE6FD",
-                "#7DD3FC",
-                "#38BDF8",
-                "#0284C7",
-                "#0369A1",
-                "#075985",
-                "#0C4A6E",
-                "#0F172A",
-            ]
-        ),
-    )
+fig_workflow = px.bar(
+    workflow_df,
+    x="Completion",
+    y="Stage",
+    orientation="h",
+    template="plotly_dark",
 )
 
-fig_funnel.update_layout(
-    height=450,
-    margin=dict(l=20, r=20, t=20, b=20),
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(color="white"),
+fig_workflow.update_layout(
+    height=420,
+    yaxis=dict(autorange="reversed"),
+    xaxis=dict(range=[0, 100]),
+    margin=dict(l=10, r=10, t=10, b=10),
+    showlegend=False,
 )
 
-st.plotly_chart(fig_funnel, use_container_width=True, key="home_workflow_funnel_chart")
+st.plotly_chart(
+    fig_workflow,
+    use_container_width=True,
+)
 
 st.divider()
 
 # ==========================================================
-# 7. CORE PLATFORM CAPABILITIES
+# PLATFORM ARCHITECTURE
 # ==========================================================
-st.subheader("⭐ Core Platform Modules")
 
-c1, c2, c3 = st.columns(3)
+st.header("🏗 Platform Architecture")
 
-with c1:
-    st.markdown(
-        """
-        <div style="background-color: #1E293B; padding: 20px; border-radius: 10px; border: 1px solid #334155; height: 100%;">
-            <h4 style="color: #38BDF8; margin-top:0;">📊 Analytics & BI</h4>
-            <ul style="color: #94A3B8; font-size: 14px; padding-left: 18px;">
-                <li><b>Executive KPIs:</b> Macro revenue, order volume, and unit statistics.</li>
-                <li><b>Temporal Trends:</b> Revenue trajectory and monthly seasonality.</li>
-                <li><b>Geographic Insights:</b> Top country performance breakdowns.</li>
-                <li><b>Data Quality Audits:</b> Cleaning rules and missing value handling.</li>
-            </ul>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-with c2:
-    st.markdown(
-        """
-        <div style="background-color: #1E293B; padding: 20px; border-radius: 10px; border: 1px solid #334155; height: 100%;">
-            <h4 style="color: #818CF8; margin-top:0;">🤖 Machine Learning</h4>
-            <ul style="color: #94A3B8; font-size: 14px; padding-left: 18px;">
-                <li><b>RFM Segmentation:</b> Behavioral grouping (Champions, At-Risk, etc.).</li>
-                <li><b>CLV Regressors:</b> Predicting 12-month future revenue potential.</li>
-                <li><b>Churn Classifiers:</b> Predicting customer attrition probabilities.</li>
-                <li><b>Recommender Systems:</b> Item-to-item collaborative filtering.</li>
-            </ul>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-with c3:
-    st.markdown(
-        """
-        <div style="background-color: #1E293B; padding: 20px; border-radius: 10px; border: 1px solid #334155; height: 100%;">
-            <h4 style="color: #34D399; margin-top:0;">💼 Business Applications</h4>
-            <ul style="color: #94A3B8; font-size: 14px; padding-left: 18px;">
-                <li><b>Targeted Retention:</b> Early intervention for high-risk accounts.</li>
-                <li><b>Marketing Optimization:</b> Campaign ROI estimators per segment.</li>
-                <li><b>Cross-Selling:</b> Automated product bundle recommendations.</li>
-                <li><b>Executive Reporting:</b> Exportable CSV lists and interactive filters.</li>
-            </ul>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-st.divider()
-
-# ==========================================================
-# 8. MACRO BUSINESS SAMPLES & HIGHLIGHTS
-# ==========================================================
-st.subheader("🌍 Revenue by Region & Top Selling Products")
-
-top_col1, top_col2 = st.columns(2)
-
-with top_col1:
-    top_countries = (
-        df.groupby("Country")["Revenue"]
-        .sum()
-        .reset_index()
-        .sort_values(by="Revenue", ascending=False)
-        .head(8)
-    )
-
-    fig_country_home = px.bar(
-        top_countries,
-        x="Revenue",
-        y="Country",
-        orientation="h",
-        title="Top 8 Revenue Contributing Countries",
-        color="Revenue",
-        color_continuous_scale="Blues",
-    )
-    fig_country_home.update_layout(
-        height=360,
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#F8FAFC"),
-        yaxis=dict(categoryorder="total ascending"),
-        coloraxis_showscale=False,
-    )
-    st.plotly_chart(fig_country_home, use_container_width=True, key="home_top_countries_chart")
-
-with top_col2:
-    top_products = (
-        df.groupby("Description")["Quantity"]
-        .sum()
-        .reset_index()
-        .sort_values(by="Quantity", ascending=False)
-        .head(8)
-    )
-
-    fig_products_home = px.bar(
-        top_products,
-        x="Quantity",
-        y="Description",
-        orientation="h",
-        title="Top 8 Products by Volume Sold",
-        color="Quantity",
-        color_continuous_scale="Teal",
-    )
-    fig_products_home.update_layout(
-        height=360,
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#F8FAFC"),
-        yaxis=dict(categoryorder="total ascending"),
-        coloraxis_showscale=False,
-    )
-    st.plotly_chart(fig_products_home, use_container_width=True, key="home_top_products_chart")
-
-st.divider()
-
-# ==========================================================
-# 9. FOOTER
-# ==========================================================
-f1, f2, f3 = st.columns(3)
-
-with f1:
-    st.markdown("### 📂 Dataset")
-    st.caption("Online Retail Dataset • United Kingdom Retail Store • Cleaned Transactional Data")
-
-with f2:
-    st.markdown("### 🛠️ Built With")
-    st.caption("Python • Pandas • Scikit-Learn • Plotly • Streamlit")
-
-with f3:
-    st.markdown("### ✅ Current Status")
-    st.caption("✔ 9 Phases Completed • Dashboard Ready • Deployment Ready")
-
-st.markdown("<br>", unsafe_allow_html=True)
-st.markdown(
-    """
-    <div style="text-align: center; color: #64748B; font-size: 14px;">
-        Intelligent Customer Analytics Platform • Home Module
-    </div>
-    """,
-    unsafe_allow_html=True,
+st.caption(
+    "The complete solution consists of multiple integrated analytics "
+    "modules working together."
 )
+
+arch_col1, arch_col2, arch_col3, arch_col4 = st.columns(4)
+
+with arch_col1:
+
+    st.info(
+        """
+**📁 Data Layer**
+
+- Raw dataset
+- Validation
+- Cleaning
+- Transformation
+"""
+    )
+
+with arch_col2:
+
+    st.info(
+        """
+**⚙️ Processing Layer**
+
+- Feature engineering
+- RFM analysis
+- Encoding
+- Scaling
+"""
+    )
+
+with arch_col3:
+
+    st.info(
+        """
+**🤖 ML Layer**
+
+- Segmentation
+- CLV prediction
+- Churn prediction
+- Recommendation
+"""
+    )
+
+with arch_col4:
+
+    st.info(
+        """
+**📊 Presentation Layer**
+
+- Streamlit
+- Interactive dashboard
+- Business insights
+- Decision support
+"""
+    )
+
+st.divider()
+
+# ==========================================================
+# CORE PLATFORM FEATURES
+# ==========================================================
+
+st.header("⭐ Core Platform Features")
+
+feature_col1, feature_col2, feature_col3 = st.columns(3)
+
+with feature_col1:
+
+    st.subheader("📊 Analytics")
+
+    st.markdown(
+        """
+- Executive KPIs
+- Revenue analytics
+- Customer behaviour
+- Country performance
+- Product insights
+- Interactive dashboard
+"""
+    )
+
+with feature_col2:
+
+    st.subheader("🤖 Machine Learning")
+
+    st.markdown(
+        """
+- Customer segmentation
+- CLV prediction
+- Churn prediction
+- Recommendation engine
+- Model evaluation
+- Business intelligence
+"""
+    )
+
+with feature_col3:
+
+    st.subheader("💼 Business Applications")
+
+    st.markdown(
+        """
+- Customer retention
+- Marketing strategy
+- Revenue optimization
+- Product recommendation
+- Executive reporting
+- Decision support
+"""
+    )
+
+st.divider()
+
+# ==========================================================
+# TOP COUNTRIES BY REVENUE
+# ==========================================================
+
+st.header("🌍 Top Countries by Revenue")
+
+st.caption("Countries generating the highest revenue.")
+
+top_countries = (
+    df.groupby("Country", as_index=False)["Revenue"]
+    .sum()
+    .sort_values("Revenue", ascending=False)
+    .head(10)
+)
+
+fig_top_countries = px.bar(
+    top_countries,
+    x="Revenue",
+    y="Country",
+    orientation="h",
+    template="plotly_dark",
+)
+
+fig_top_countries.update_layout(
+    height=420,
+    yaxis=dict(autorange="reversed"),
+    margin=dict(l=10, r=10, t=10, b=10),
+)
+
+st.plotly_chart(
+    fig_top_countries,
+    use_container_width=True,
+)
+
+top_country_row = top_countries.iloc[0]
+
+st.success(
+    f"💡 **Business Recommendation:** Focus customer retention campaigns "
+    f"in {top_country_row['Country']} and other high-revenue markets, "
+    f"while identifying opportunities in lower-performing regions."
+)
+
+st.divider()
+
+# ==========================================================
+# BEST SELLING PRODUCTS
+# ==========================================================
+
+st.header("📦 Best Selling Products")
+
+st.caption("Products contributing the highest sales volume.")
+
+top_products = (
+    df.groupby("Description", as_index=False)["Quantity"]
+    .sum()
+    .sort_values("Quantity", ascending=False)
+    .head(10)
+)
+
+fig_top_products = px.bar(
+    top_products,
+    x="Quantity",
+    y="Description",
+    orientation="h",
+    template="plotly_dark",
+)
+
+fig_top_products.update_layout(
+    height=420,
+    yaxis=dict(autorange="reversed"),
+    margin=dict(l=10, r=10, t=10, b=10),
+)
+
+st.plotly_chart(
+    fig_top_products,
+    use_container_width=True,
+)
+
+st.divider()
+
+# ==========================================================
+# NAVIGATION
+# ==========================================================
+
+st.header("🧭 Explore the Platform")
+
+nav_col1, nav_col2, nav_col3, nav_col4 = st.columns(4)
+
+with nav_col1:
+
+    st.page_link("pages/2_Data_Overview.py", label="📊 Data Overview")
+
+    st.page_link("pages/3_Customer_Segmentation.py", label="👥 Customer Segmentation")
+
+with nav_col2:
+
+    st.page_link("pages/4_CLV_Prediction.py", label="💰 CLV Prediction")
+
+    st.page_link("pages/5_Churn_Prediction.py", label="⚠️ Churn Prediction")
+
+with nav_col3:
+
+    st.page_link("pages/6_Recommendation_System.py", label="🎯 Recommendation System")
+
+    st.page_link("pages/7_Business_Insights.py", label="📈 Business Insights")
+
+with nav_col4:
+
+    st.page_link("pages/8_About.py", label="ℹ️ About")
+
+st.divider()
+
+st.caption("Intelligent Customer Analytics Platform · Built with Streamlit & Plotly")
