@@ -41,10 +41,21 @@ from utils.config import (
 
 def load_cleaned_data():
     """
-    Load the cleaned dataset used by the dashboard.
+    Load the canonical cleaned transaction dataset used by the
+    dashboard.
+
+    This was previously pointed at "cleaned_online_retail.csv",
+    an intermediate file that only has the raw column names
+    (Invoice, Price, "Customer ID", TotalAmount) and none of the
+    derived columns (CustomerID, InvoiceNo, Revenue, Year, Month,
+    etc.) that Home.py and Data_Overview.py rely on. That
+    mismatch was the root cause of the KeyError on those two
+    pages. This now loads the single canonical dataset produced
+    directly by src/data/cleaner.py, which has the full schema
+    every page expects.
     """
     return load_csv(
-        PROCESSED_DATA_DIR / "cleaned_online_retail.csv"
+        PROCESSED_DATA_DIR / "final_cleaned_dataset.csv"
     )
 
 

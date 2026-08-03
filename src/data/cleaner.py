@@ -1,7 +1,30 @@
 """
 Data Cleaning Module
 
-Performs all cleaning operations on the raw dataset.
+Performs all cleaning operations on the raw dataset and produces
+the single canonical transaction-level dataset used by every
+notebook and every dashboard page in this project:
+
+    data/processed/final_cleaned_dataset.csv
+
+Canonical schema produced by this module:
+
+    InvoiceNo, StockCode, Description, Quantity, InvoiceDate,
+    UnitPrice, CustomerID, Country, IsCancelled, Revenue,
+    Year, Month, MonthName, Day, DayName, Hour, Quarter,
+    DayOfWeek, Week, IsWeekend, TimeOfDay
+
+Previously, this module only produced an intermediate dataset
+(cleaned_online_retail.csv) using the raw column names (Invoice,
+Price, "Customer ID", TotalAmount). A separate, one-off cell in
+the Phase 3 EDA notebook then renamed those columns and derived
+Revenue and the time-based features, saving the result as
+final_cleaned_dataset.csv. That meant the canonical dataset only
+existed if someone had manually run that notebook cell by hand,
+and the transformation logic lived nowhere in version-controlled,
+reusable code. This module now owns that transformation directly,
+so `DataPipeline().run()` alone is enough to reproduce the
+canonical dataset from raw data every time.
 """
 
 from pathlib import Path
@@ -13,12 +36,53 @@ from config.config import (
     QUANTITY_COLUMN,
 )
 
-from config.paths import PROCESSED_DATA_DIR
+from config.paths import FINAL_CLEANED_DATA_PATH
+
+
+# ================================================================
+# Canonical Schema
+# ================================================================
+
+# Raw -> canonical column renames. Applied after the raw-schema
+# cleaning steps (which still refer to the raw names below), and
+# before Revenue and the time-based features are derived.
+CANONICAL_COLUMN_RENAMES = {
+    "Invoice": "InvoiceNo",
+    "Price": "UnitPrice",
+    "Customer ID": "CustomerID",
+}
+
+# Final column order for the canonical dataset.
+CANONICAL_COLUMN_ORDER = [
+    "InvoiceNo",
+    "StockCode",
+    "Description",
+    "Quantity",
+    "InvoiceDate",
+    "UnitPrice",
+    "CustomerID",
+    "Country",
+    "IsCancelled",
+    "Revenue",
+    "Year",
+    "Month",
+    "MonthName",
+    "Day",
+    "DayName",
+    "Hour",
+    "Quarter",
+    "DayOfWeek",
+    "Week",
+    "IsWeekend",
+    "TimeOfDay",
+]
 
 
 class DataCleaner:
     """
-    Cleans the Online Retail II dataset.
+    Cleans the Online Retail II dataset and produces the
+    canonical transaction-level dataset used throughout the
+    project.
     """
 
     def __init__(self):
@@ -38,6 +102,11 @@ class DataCleaner:
 
         original_rows = len(df)
 
+        # ---- Raw-schema cleaning steps ----
+        # These operate on the raw column names (Invoice, Price,
+        # "Customer ID") exactly as they appear in the source
+        # dataset, before any renaming happens.
+
         df = self.remove_duplicates(df)
 
         df = self.convert_datetime(df)
@@ -50,7 +119,18 @@ class DataCleaner:
 
         df = self.create_cancellation_column(df)
 
-        df = self.create_total_amount(df)
+        # ---- Canonical schema steps ----
+        # From here on, the dataset is transformed into the
+        # single canonical schema used by every later phase and
+        # the dashboard.
+
+        df = self.rename_to_canonical_columns(df)
+
+        df = self.create_revenue_column(df)
+
+        df = self.create_time_features(df)
+
+        df = self.enforce_canonical_schema(df)
 
         df = df.reset_index(drop=True)
 
@@ -154,16 +234,116 @@ class DataCleaner:
         return df
 
     # ==========================================================
-    # Total Amount
+    # Rename to Canonical Column Names
     # ==========================================================
 
-    def create_total_amount(self, df):
+    def rename_to_canonical_columns(self, df):
 
-        df["TotalAmount"] = df[QUANTITY_COLUMN] * df[PRICE_COLUMN]
+        df = df.rename(columns=CANONICAL_COLUMN_RENAMES)
 
-        print("Created TotalAmount Column.")
+        print(
+            "\nRenamed columns to canonical schema: "
+            f"{CANONICAL_COLUMN_RENAMES}"
+        )
 
         return df
+
+    # ==========================================================
+    # Revenue
+    # ==========================================================
+
+    def create_revenue_column(self, df):
+
+        df["Revenue"] = df[QUANTITY_COLUMN] * df["UnitPrice"]
+
+        print("Created Revenue column.")
+
+        return df
+
+    # ==========================================================
+    # Time-Based Features
+    # ==========================================================
+
+    def create_time_features(self, df):
+        """
+        Derive every time-based feature used across the project
+        (Year, Month, MonthName, Day, DayName, Hour, Quarter,
+        DayOfWeek, Week, IsWeekend, TimeOfDay) from InvoiceDate.
+        """
+
+        df["Year"] = df["InvoiceDate"].dt.year
+
+        df["Month"] = df["InvoiceDate"].dt.month
+
+        df["MonthName"] = df["InvoiceDate"].dt.month_name()
+
+        df["Day"] = df["InvoiceDate"].dt.day
+
+        df["DayName"] = df["InvoiceDate"].dt.day_name()
+
+        df["Hour"] = df["InvoiceDate"].dt.hour
+
+        df["Quarter"] = df["InvoiceDate"].dt.quarter
+
+        df["DayOfWeek"] = df["InvoiceDate"].dt.dayofweek
+
+        df["Week"] = df["InvoiceDate"].dt.isocalendar().week.astype(int)
+
+        df["IsWeekend"] = df["DayOfWeek"].isin([5, 6])
+
+        df["TimeOfDay"] = df["Hour"].apply(self._bucket_time_of_day)
+
+        print("Created time-based features (Year, Month, MonthName, "
+              "Day, DayName, Hour, Quarter, DayOfWeek, Week, "
+              "IsWeekend, TimeOfDay).")
+
+        return df
+
+    @staticmethod
+    def _bucket_time_of_day(hour):
+        """
+        Bucket an hour (0-23) into a named part of the day.
+
+        06:00-11:59 -> Morning
+        12:00-16:59 -> Afternoon
+        17:00-20:59 -> Evening
+        21:00-05:59 -> Night
+        """
+
+        if 6 <= hour < 12:
+            return "Morning"
+        elif 12 <= hour < 17:
+            return "Afternoon"
+        elif 17 <= hour < 21:
+            return "Evening"
+        else:
+            return "Night"
+
+    # ==========================================================
+    # Enforce Canonical Schema
+    # ==========================================================
+
+    def enforce_canonical_schema(self, df):
+        """
+        Select and order columns to exactly match
+        CANONICAL_COLUMN_ORDER, so the saved dataset always has
+        a predictable, consistent schema regardless of any
+        incidental column ordering earlier in the pipeline.
+        """
+
+        missing = [
+            column
+            for column in CANONICAL_COLUMN_ORDER
+            if column not in df.columns
+        ]
+
+        if missing:
+            raise ValueError(
+                f"Cannot produce the canonical dataset - missing "
+                f"expected columns: {missing}"
+            )
+
+        return df[CANONICAL_COLUMN_ORDER]
 
     # ==========================================================
     # Save Dataset
@@ -171,15 +351,13 @@ class DataCleaner:
 
     def save_cleaned_data(self, df):
 
-        PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
+        FINAL_CLEANED_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-        output_path = PROCESSED_DATA_DIR / "cleaned_online_retail.csv"
+        df.to_csv(FINAL_CLEANED_DATA_PATH, index=False)
 
-        df.to_csv(output_path, index=False)
+        print("\nCanonical dataset saved successfully.")
 
-        print("\nCleaned dataset saved successfully.")
-
-        print(output_path)
+        print(FINAL_CLEANED_DATA_PATH)
 
     # ==========================================================
     # Cleaning Summary

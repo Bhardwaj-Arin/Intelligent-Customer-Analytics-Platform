@@ -41,3 +41,13 @@ MODELS_DIR = PROJECT_ROOT / "models"
 # ------------------------------------------------------------------
 
 DASHBOARD_DIR = PROJECT_ROOT / "dashboard"
+
+# ------------------------------------------------------------------
+# Canonical Dataset
+# ------------------------------------------------------------------
+#
+# The single transaction-level dataset used by every notebook
+# (Phase 4 onward) and every dashboard page. Produced by
+# src/data/cleaner.py via DataPipeline().run().
+
+FINAL_CLEANED_DATA_PATH = PROCESSED_DATA_DIR / "final_cleaned_dataset.csv"
