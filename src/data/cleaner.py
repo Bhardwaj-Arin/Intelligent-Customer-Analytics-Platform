@@ -392,20 +392,19 @@ class DataCleaner:
         for col in category_cols:
             df[col] = df[col].astype("category")
 
-        compression_path = FINAL_CLEANED_DATA_PATH.with_suffix(".csv.gz")
+        compressed_path = FINAL_CLEANED_DATA_PATH.with_suffix(".csv.gz")
 
         df.to_csv(
-            compression_path,
+            compressed_path,
             index=False,
             float_format="%.2f",
             compression="gzip"
         )
 
         print("\nCanonical dataset saved successfully.")
-        print(compression_path)
+        print(compressed_path)
 
-        size_mb = compression_path.stat().st_size / (1024 * 1024)
-
+        size_mb = compressed_path.stat().st_size / (1024 * 1024)
         print(f"\nCompressed Dataset Size : {size_mb:.2f} MB")
 
     # ==========================================================
