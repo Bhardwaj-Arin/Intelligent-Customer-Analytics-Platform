@@ -55,7 +55,7 @@ def load_cleaned_data():
     every page expects.
     """
     return load_csv(
-        PROCESSED_DATA_DIR / "final_cleaned_dataset.csv"
+        PROCESSED_DATA_DIR / "final_cleaned_dataset.csv.gz"
     )
 
 

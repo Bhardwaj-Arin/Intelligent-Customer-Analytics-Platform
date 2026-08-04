@@ -345,7 +345,7 @@ class DataCleaner:
 
         return df[CANONICAL_COLUMN_ORDER]
 
-        # ==========================================================
+    # ==========================================================
     # Save Dataset
     # ==========================================================
 
@@ -392,20 +392,23 @@ class DataCleaner:
         for col in category_cols:
             df[col] = df[col].astype("category")
 
+        compression_path = FINAL_CLEANED_DATA_PATH.with_suffix(".csv.gz")
+
         df.to_csv(
-            FINAL_CLEANED_DATA_PATH,
+            compression_path,
             index=False,
-            float_format="%.2f"
+            float_format="%.2f",
+            compression="gzip"
         )
 
         print("\nCanonical dataset saved successfully.")
-        print(FINAL_CLEANED_DATA_PATH)
+        print(compression_path)
 
-        size_mb = FINAL_CLEANED_DATA_PATH.stat().st_size / (1024 * 1024)
+        size_mb = compression_path.stat().st_size / (1024 * 1024)
 
-        print(f"\nDataset Size : {size_mb:.2f} MB")
+        print(f"\nCompressed Dataset Size : {size_mb:.2f} MB")
 
-        # ==========================================================
+    # ==========================================================
     # Cleaning Summary
     # ==========================================================
 
