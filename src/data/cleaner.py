@@ -345,7 +345,7 @@ class DataCleaner:
 
         return df[CANONICAL_COLUMN_ORDER]
 
-    # ==========================================================
+        # ==========================================================
     # Save Dataset
     # ==========================================================
 
@@ -353,13 +353,59 @@ class DataCleaner:
 
         FINAL_CLEANED_DATA_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-        df.to_csv(FINAL_CLEANED_DATA_PATH, index=False)
+        # Float columns
+        float_cols = [
+            "UnitPrice",
+            "Revenue"
+        ]
+
+        for col in float_cols:
+            df[col] = df[col].astype("float32")
+
+        # Integer columns
+        int_cols = [
+            "Quantity",
+            "Year",
+            "Month",
+            "Day",
+            "Hour",
+            "Quarter",
+            "DayOfWeek",
+            "Week"
+        ]
+
+        for col in int_cols:
+            df[col] = pd.to_numeric(df[col], downcast="integer")
+
+        # Boolean
+        df["IsWeekend"] = df["IsWeekend"].astype("bool")
+        df["IsCancelled"] = df["IsCancelled"].astype("bool")
+
+        # Category columns
+        category_cols = [
+            "Country",
+            "MonthName",
+            "DayName",
+            "TimeOfDay"
+        ]
+
+        for col in category_cols:
+            df[col] = df[col].astype("category")
+
+        df.to_csv(
+            FINAL_CLEANED_DATA_PATH,
+            index=False,
+            float_format="%.2f"
+        )
 
         print("\nCanonical dataset saved successfully.")
-
         print(FINAL_CLEANED_DATA_PATH)
 
-    # ==========================================================
+        size_mb = FINAL_CLEANED_DATA_PATH.stat().st_size / (1024 * 1024)
+
+        print(f"\nDataset Size : {size_mb:.2f} MB")
+
+        # ==========================================================
     # Cleaning Summary
     # ==========================================================
 
@@ -371,7 +417,6 @@ class DataCleaner:
         print("=" * 60)
 
         for key, value in self.cleaning_summary.items():
-
             print(f"{key:<20}: {value:,}")
 
         print("=" * 60)
