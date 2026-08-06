@@ -6,7 +6,7 @@ Feature engineering is the process of transforming raw transaction data into mea
 
 In this phase, transaction-level information was aggregated to create numerical features that describe each customer's purchasing behaviour, spending habits, product preferences, and overall shopping patterns.
 
-The final output of this phase is a customer-level dataset that serves as the input for customer segmentation.
+The final output of this phase is a comprehensive customer-level feature dataset that serves as the foundation for multiple downstream machine learning tasks, including Customer Segmentation, Customer Lifetime Value (CLV) Prediction, Customer Churn Prediction, and the Recommendation System. By transforming raw transactional data into meaningful behavioural features, this phase creates a unified customer representation that can be reused across the entire Intelligent Customer Analytics Platform.
 
 ---
 
@@ -15,10 +15,12 @@ The final output of this phase is a customer-level dataset that serves as the in
 The primary objectives of this phase were:
 
 - Convert transaction-level data into customer-level data.
-- Engineer meaningful behavioural features.
-- Remove dependency on raw transactional records.
-- Create features suitable for clustering algorithms.
+- Engineer meaningful customer behavioural features.
+- Capture purchasing, spending, temporal, product, and cancellation behaviour.
+- Design reusable features for multiple machine learning tasks.
+- Improve predictive performance through advanced feature engineering.
 - Validate the engineered dataset before saving.
+- Create a centralized feature repository for all downstream models.
 
 ---
 
@@ -71,7 +73,7 @@ Feature engineering summarizes this information into meaningful numerical values
 
 # Features Created
 
-A total of seven feature groups were created.
+A total of eight feature groups were created, resulting in 31 engineered customer-level features.
 
 ## 1. RFM Features
 
@@ -210,11 +212,63 @@ Since it is categorical, it will not be used directly for K-Means clustering.
 
 ---
 
+## 8. Advanced Behavioural Features
+
+To improve the predictive performance of downstream machine learning models, several additional behavioural features were engineered.
+
+### AverageBasketValue
+
+Average revenue generated per completed purchase.
+
+Business Meaning:
+
+Measures the average monetary value of each customer transaction.
+
+---
+
+### PurchaseVelocity
+
+Average number of purchases made per active month.
+
+Business Meaning:
+
+Captures how frequently customers purchase during their active lifetime.
+
+---
+
+### ProductDiversityRatio
+
+Ratio of unique products purchased relative to total purchase frequency.
+
+Business Meaning:
+
+Measures product exploration behaviour and customer purchasing diversity.
+
+---
+
+### PurchaseTrend
+
+Difference between purchase frequency in the second half and first half of the customer's activity period.
+
+Business Meaning:
+
+Positive values indicate increasing purchasing activity, while negative values may indicate declining engagement.
+
+---
+
+### RevenueTrend
+
+Difference between customer revenue generated during the second half and first half of the observation period.
+
+Business Meaning:
+
+Captures changes in customer spending behaviour over time and provides an early indicator of potential churn or customer growth.
+
 # Merging All Features
 
 After creating individual feature tables, they were merged using CustomerID.
 
-The final dataset contains one row per customer and combines all engineered features into a single table.
+The final dataset contains one row per customer and 31 engineered behavioural features. These features summarize purchasing behaviour, spending habits, product diversity, customer activity, cancellations, geographic information, and behavioural trends, providing a comprehensive customer representation for machine learning.
 
 This customer-level dataset is much more suitable for machine learning than the original transaction-level data.
 
@@ -240,9 +294,24 @@ Output File:
 
 data/processed/customer_features.csv
 
-This dataset contains one row per customer with all engineered features.
+This dataset contains one row per customer with 31 engineered behavioural features.
 
-It serves as the input for the Customer Segmentation phase.
+It serves as the primary feature repository for:
+
+- Customer Segmentation
+- Customer Lifetime Value Prediction
+- Customer Churn Prediction
+- Recommendation System
+
+Every downstream machine learning model in this project uses this engineered dataset.
+
+Output File:
+
+data/processed/customer_features.csv
+
+Dataset Shape:
+- Rows (Customers): 5,878
+- Columns (Features): 31
 
 ---
 
@@ -250,14 +319,19 @@ It serves as the input for the Customer Segmentation phase.
 
 During this phase, I learned:
 
-- How to aggregate transaction-level data into customer-level data.
-- Why feature engineering is essential before clustering.
-- How to use groupby() and aggregation functions effectively.
-- How business understanding influences feature selection.
-- The importance of validating engineered datasets before modelling.
+- How to transform transaction-level data into customer-level behavioural data.
+- How to design meaningful business-oriented features.
+- How temporal and behavioural trends improve predictive performance.
+- How advanced feature engineering can significantly improve machine learning models.
+- How reusable feature repositories simplify large end-to-end machine learning projects.
+- The importance of validating engineered datasets before model development.
 
 ---
 
 # Conclusion
 
-Feature Engineering transformed raw transactional records into a structured customer dataset containing meaningful behavioural features. These engineered features capture customer purchasing patterns, spending habits, product preferences, and shopping behaviour. The resulting dataset is now ready for clustering and customer segmentation in the next phase of the project.
+Feature Engineering transformed raw transactional records into a comprehensive customer-level dataset containing 31 engineered behavioural features. These features capture customer purchasing behaviour, spending habits, product diversity, temporal activity, cancellation behaviour, geographic information, and behavioural trends.
+
+The engineered dataset serves as the central feature repository for the entire Intelligent Customer Analytics Platform and is reused across Customer Segmentation, Customer Lifetime Value Prediction, Customer Churn Prediction, and the Recommendation System.
+
+The addition of advanced behavioural features such as Purchase Velocity, Average Basket Value, Product Diversity Ratio, Purchase Trend, and Revenue Trend significantly enhanced the predictive capability of downstream machine learning models, leading to substantial improvements in customer churn prediction performance.

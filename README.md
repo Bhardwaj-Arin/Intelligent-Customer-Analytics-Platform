@@ -44,10 +44,10 @@
 
 Businesses collect enormous volumes of customer data but routinely struggle to turn it into decisions. Without proper analysis, it's hard to know who your best customers are, who's about to leave, or what to recommend to whom.
 
-The **Intelligent Customer Analytics Platform** takes real transactional logs from the **Online Retail II dataset** — 797,815 cleaned transactions across 5,900+ customers, 4,000+ products, and 38 countries — and pushes them through a complete, reproducible pipeline covering four layers of analytics:
+The **Intelligent Customer Analytics Platform** takes real transactional logs from the **Online Retail II dataset** — 797,815 cleaned transactions across 5,878 Customers customers, Engineered Customer Features : 31, 4,000+ products, and 38 countries — and pushes them through a complete, reproducible pipeline covering four layers of analytics:
 
 1. **Descriptive Analytics** — real-time sales KPIs, revenue trends, country and product performance, time-based purchase patterns.
-2. **Behavioral Segmentation** — unsupervised customer grouping based on Recency, Frequency, and Monetary (RFM) value.
+2. **Behavioral Segmentation — unsupervised customer grouping using standardized customer behavioural features derived from purchasing spending, product diversity, temporal activity, and RFM metrics.
 3. **Predictive Analytics** — forecasting Customer Lifetime Value (CLV) and estimating churn probability per customer.
 4. **Prescriptive Systems** — personalized product recommendations via a hybrid of popularity ranking, collaborative filtering, and item-item similarity.
 
@@ -69,14 +69,15 @@ Raw Transaction Data (Online Retail II)
    Exploratory Data Analysis
               │
               ▼
-   Feature Engineering (RFM)
+   Feature Engineering
+(31 Behavioural Features)
               │
    ┌──────────┼────────────────┬─────────────────────┐
    ▼          ▼                ▼                      ▼
 Customer    CLV              Churn              Recommendation
 Segmentation Prediction     Prediction              System
-(K-Means)  (Gradient        (Gradient          (Popularity + Item
-            Boosting)        Boosting)           Similarity + CF)
+(K-Means)  (Gradient        (Random          (Popularity + Item
+            Boosting)        Forest)           Similarity + CF)
    │          │                │                      │
    └──────────┴────────────────┴──────────────────────┘
                               │
@@ -97,9 +98,9 @@ Every stage is backed by version-controlled code in `src/`, a corresponding Jupy
 - Interactive filters and CSV export on every dashboard page
 
 **Machine Learning**
-- Customer segmentation via K-Means clustering on RFM features
+- Customer segmentation using standardized customer behavioural features derived from 31 engineered customer attributes
 - Customer Lifetime Value prediction via a tuned Gradient Boosting regressor
-- Churn prediction via a tuned Gradient Boosting classifier
+- Churn prediction using a Random Forest classifier trained on 29 customer behavioural features
 - A hybrid recommendation engine combining popularity ranking, customer-based collaborative filtering, item-item similarity, and association rule mining
 
 **Business Applications**
@@ -118,7 +119,28 @@ Raw transaction data is loaded, validated against an expected schema, and cleane
 
 ### 2. Feature Engineering & RFM Modeling
 
-Per-customer features are built on top of the cleaned transactions: **Recency** (days since last purchase), **Frequency** (number of distinct orders), and **Monetary** (total spend), plus supporting features like average order revenue and unique products purchased. These RFM features are the foundation for every model downstream.
+Feature Engineering transforms transaction-level records into a customer-level dataset containing 31 engineered behavioural features.
+
+These include:
+
+• RFM Features
+• Purchase Behaviour Features
+• Spending Behaviour Features
+• Product Diversity Features
+• Temporal Behaviour Features
+• Cancellation Behaviour
+• Country Information
+• Advanced Behavioural Features
+
+New advanced features include:
+
+• AverageBasketValue
+• PurchaseVelocity
+• ProductDiversityRatio
+• PurchaseTrend
+• RevenueTrend
+
+These engineered features serve as the foundation for Customer Segmentation, CLV Prediction, Customer Churn Prediction, and the Recommendation System.
 
 ### 3. Customer Segmentation (K-Means Clustering)
 
@@ -130,7 +152,7 @@ A regression model predicts each customer's future value from their RFM and purc
 
 ### 5. Churn Prediction
 
-A classification model estimates each customer's probability of churning based on recency, frequency, and engagement features. **Gradient Boosting** was again the top performer here, evaluated with a full confusion matrix and ROC curve.
+A classification model estimates each customer's probability of churning based on 29 engineered customer behavioural features including purchasing behaviour, spending trends, purchase velocity, revenue trends, basket value, product diversity, temporal behaviour, and customer activity.. **Random Forest Classifier** was again the top performer here, evaluated with a full confusion matrix and ROC curve.
 
 ### 6. Hybrid Recommendation System
 
@@ -153,12 +175,50 @@ The dashboard's Recommendation System page also blends similarity and popularity
 | **CLV Prediction** | Best Model | Gradient Boosting |
 | | MAE | 173.17 |
 | | RMSE | 479.67 |
-| **Churn Prediction** | Best Model | Gradient Boosting |
-| | Accuracy | 99.49% |
-| | Precision / Recall / F1 | 0.9949 |
-| | ROC-AUC | 0.9997 |
+| **Churn Prediction** | Best Model | Random Forest |
+| | Accuracy | 85.37% |
+| | Precision | 85.36% |
+| | Recall | 85.37% |
+| | F1 | 84.67%% |
+| | ROC-AUC | 0.9376 |
 
-> **Note on CLV performance:** the current CLV regressor's R² is close to zero, meaning it isn't yet meaningfully outperforming a naive average-based prediction on held-out data. This is called out honestly here rather than hidden — see [Known Limitations](#-known-limitations--roadmap) for planned improvements. The churn model's near-perfect scores are also worth a second look before treating them as production-ready — extremely high classification metrics like this can sometimes indicate the model has (indirect) access to information that wouldn't be available at prediction time in a real deployment, so it's worth double-checking the feature set for that before relying on these numbers operationally.
+## Project Statistics
+
+✔ 797,815 Transactions
+
+✔ 5,878 Customers
+
+✔ 31 Engineered Features
+
+✔ 4 Machine Learning Models
+
+✔ 8 Interactive Dashboard Pages
+
+✔ End-to-End Production Pipeline
+
+## 🚀 Feature Engineering Highlights
+
+The project engineers **31 customer-level behavioural features** from raw transaction data, making the dataset suitable for multiple downstream machine learning tasks.
+
+Feature groups include:
+
+- RFM Features
+- Purchase Behaviour Features
+- Spending Behaviour Features
+- Product Features
+- Behaviour Features
+- Cancellation Features
+- Country Feature
+- Advanced Behavioural Features
+
+The engineered dataset serves as a shared feature repository for:
+
+- Customer Segmentation
+- Customer Lifetime Value Prediction
+- Customer Churn Prediction
+- Recommendation System
+
+> **Note on CLV performance:** the current CLV regressor's R² is close to zero, meaning it isn't yet meaningfully outperforming a naive average-based prediction on held-out data. This is called out honestly here rather than hidden — see [Known Limitations](#-known-limitations--roadmap) for planned improvements.
 
 Full metrics, confusion matrices, ROC curves, and feature importance charts are versioned in `artifacts/` and `reports/figures/`.
 
@@ -171,7 +231,7 @@ The **Online Retail II** dataset contains real transactional records from a UK-b
 | Attribute | Value |
 |---|---|
 | Domain | E-Commerce |
-| Customers | 5,900+ |
+| Customers | 5,878 |
 | Cleaned Transactions | 797,815 |
 | Products | 4,000+ |
 | Countries | 38 |
@@ -191,6 +251,9 @@ The **Online Retail II** dataset contains real transactional records from a UK-b
 | **Customer Segmentation** | Segment distribution, RFM comparison, customer value map, segment leaderboard, business recommendations per segment |
 | **CLV Prediction** | Actual vs. predicted CLV, value categories (High/Medium/Low), top customers, a quick CLV estimator |
 | **Churn Prediction** | Churn risk categories, probability distribution, top at-risk customers, retention playbook |
+| **Feature importance visualization** |
+| **Permutation importance analysis** |
+| **Real-time churn prediction** |
 | **Recommendation System** | Most popular products, customer-specific recommendations, product similarity explorer, hybrid recommendation preview |
 | **Business Insights** | Executive KPIs, revenue by segment/country/product, business health summary, strategic recommendations |
 | **About** | Project objectives, pipeline, tech stack, and project structure |
@@ -205,7 +268,7 @@ Every chart and table is computed live from the project's own processed data.
 |---|---|
 | Language | Python 3.12 |
 | Data Processing | Pandas, NumPy |
-| Machine Learning | Scikit-learn, XGBoost, LightGBM |
+| Machine Learning | Scikit-learn, XGBoost |
 | Visualization | Plotly, Matplotlib, Seaborn |
 | Dashboard | Streamlit |
 | Utilities | SciPy, Joblib, OpenPyXL, Pillow |
@@ -243,7 +306,7 @@ Intelligent-Customer-Analytics-Platform/
 │   ├── 07_customer_churn_prediction.ipynb
 │   └── 08_Recommendation_System/  # Product analysis → hybrid pipeline, 6 notebooks
 │
-├── models/                        # clv_model.pkl, clv_scaler.pkl, churn_model.pkl, churn_scaler.pkl
+├── models/                        # clv_model.pkl, clv_scaler.pkl, customer_churn_random_forest.pkl, customer_churn_scaler.pkl, country_label_encoder.pkl, feature_list.pkl, model_information.pkl
 │
 ├── artifacts/                     # Per-phase metrics: segmentation, clv, churn, recommendation
 │
@@ -316,7 +379,7 @@ The dashboard opens at `http://localhost:8501`. Or skip all of this and just use
 Answered through customer segmentation and CLV prediction, which rank customers by predicted long-term value.
 
 **Who is about to leave?**
-Answered through the churn model, which flags customers by churn probability so retention effort goes where it matters.
+Answered through the Random Forest customer churn prediction model trained on 29 engineered customer behavioural features.
 
 **What should we recommend?**
 Answered through three independent recommendation engines blended into a hybrid ranking.
@@ -331,7 +394,7 @@ Answered through the Data Overview and Business Insights pages, breaking revenue
 Being upfront about the current state of the models:
 
 - **CLV regression** currently has an R² near zero on held-out data — it isn't yet clearly better than predicting the average CLV for everyone. Next steps: richer behavioral features, log-transforming the heavily skewed CLV target, and testing XGBoost/LightGBM against the current Gradient Boosting baseline.
-- **Churn classification** metrics (99.5% accuracy, 0.9997 ROC-AUC) are unusually high and should be stress-tested — worth auditing the feature set for anything that could be leaking the target (e.g., a feature that's only knowable *after* churn has already happened) before treating this as production-ready.
+- **Random Forest** churn model achieved approximately 85% accuracy. Future improvements may include hyperparameter tuning, probability calibration, additional behavioural features, and ensemble learning techniques to further improve predictive performance and model generalization.
 - **Recommendation evaluation** artifacts exist (`artifacts/recommendation/evaluation_metrics.csv`) but aren't yet populated with headline numbers in this README — worth adding once formal offline evaluation (precision@k, recall@k) is finalized.
 
 **Planned next steps:**
