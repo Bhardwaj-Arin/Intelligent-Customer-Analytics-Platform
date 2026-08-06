@@ -44,10 +44,10 @@
 
 Businesses collect enormous volumes of customer data but routinely struggle to turn it into decisions. Without proper analysis, it's hard to know who your best customers are, who's about to leave, or what to recommend to whom.
 
-The **Intelligent Customer Analytics Platform** takes real transactional logs from the **Online Retail II dataset** — 797,815 cleaned transactions across 5,878 Customers customers, Engineered Customer Features : 31, 4,000+ products, and 38 countries — and pushes them through a complete, reproducible pipeline covering four layers of analytics:
+The **Intelligent Customer Analytics Platform** takes real transactional logs from the **Online Retail II dataset** — 797,815 cleaned transactions across 5,878 customers, 31 engineered customer-level features, more than 4,000 products, and customers from 38 countries, 4,000+ products, and 38 countries — and pushes them through a complete, reproducible pipeline covering four layers of analytics:
 
 1. **Descriptive Analytics** — real-time sales KPIs, revenue trends, country and product performance, time-based purchase patterns.
-2. **Behavioral Segmentation — unsupervised customer grouping using standardized customer behavioural features derived from purchasing spending, product diversity, temporal activity, and RFM metrics.
+2. **Behavioral Segmentation** — unsupervised customer grouping using standardized customer behavioural features derived from purchasing, spending, product diversity, temporal activity, and RFM metrics.
 3. **Predictive Analytics** — forecasting Customer Lifetime Value (CLV) and estimating churn probability per customer.
 4. **Prescriptive Systems** — personalized product recommendations via a hybrid of popularity ranking, collaborative filtering, and item-item similarity.
 
@@ -144,7 +144,7 @@ These engineered features serve as the foundation for Customer Segmentation, CLV
 
 ### 3. Customer Segmentation (K-Means Clustering)
 
-Customers are grouped into **4 behavioral segments** using K-Means clustering on standardized RFM features, with cluster count selected via the elbow method and validated with silhouette analysis.
+Customers are grouped into **4 behavioral segments** using K-Means clustering on standardized customer behavioural features engineered during the Feature Engineering phase., with cluster count selected via the elbow method and validated with silhouette analysis.
 
 ### 4. Customer Lifetime Value (CLV) Prediction
 
@@ -152,7 +152,7 @@ A regression model predicts each customer's future value from their RFM and purc
 
 ### 5. Churn Prediction
 
-A classification model estimates each customer's probability of churning based on 29 engineered customer behavioural features including purchasing behaviour, spending trends, purchase velocity, revenue trends, basket value, product diversity, temporal behaviour, and customer activity.. **Random Forest Classifier** was again the top performer here, evaluated with a full confusion matrix and ROC curve.
+A classification model estimates each customer's probability of churning based on 29 engineered customer behavioural features including purchasing behaviour, spending trends, purchase velocity, revenue trends, basket value, product diversity, temporal behaviour, and customer activity. **Random Forest Classifier** achieved the best overall performance and was selected as the final production model., evaluated with a full confusion matrix and ROC curve.
 
 ### 6. Hybrid Recommendation System
 
@@ -179,7 +179,7 @@ The dashboard's Recommendation System page also blends similarity and popularity
 | | Accuracy | 85.37% |
 | | Precision | 85.36% |
 | | Recall | 85.37% |
-| | F1 | 84.67%% |
+| | F1 | 84.67% |
 | | ROC-AUC | 0.9376 |
 
 ## Project Statistics
@@ -235,6 +235,7 @@ The **Online Retail II** dataset contains real transactional records from a UK-b
 | Cleaned Transactions | 797,815 |
 | Products | 4,000+ |
 | Countries | 38 |
+| Engineered Features | 31 |
 
 **Raw fields:** Invoice, StockCode, Description, Quantity, InvoiceDate, Price, Customer ID, Country.
 
