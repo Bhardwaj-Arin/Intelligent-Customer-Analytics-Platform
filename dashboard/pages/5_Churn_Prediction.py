@@ -32,7 +32,6 @@ CHURN_WINDOW_DAYS = 90
 # LOAD MODEL + DATA
 # ==========================================================
 
-
 @st.cache_resource(show_spinner=False)
 def load_churn_artifacts():
     model = joblib.load(CHURN_MODEL_PATH)
