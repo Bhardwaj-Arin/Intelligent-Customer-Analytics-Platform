@@ -69,9 +69,19 @@ CLV_MODEL_PATH = MODELS_DIR / "clv_model.pkl"
 
 CLV_SCALER_PATH = MODELS_DIR / "clv_scaler.pkl"
 
-CHURN_MODEL_PATH = MODELS_DIR / "churn_model.pkl"
+CHURN_MODEL_PATH = MODELS_DIR / "customer_churn_random_forest.pkl"
 
-CHURN_SCALER_PATH = MODELS_DIR / "churn_scaler.pkl"
+CHURN_FEATURE_LIST_PATH = MODELS_DIR / "feature_list.pkl"
+
+CHURN_MODEL_INFO_PATH = MODELS_DIR / "model_information.pkl"
+
+# ============================================================
+# Artifacts (model metrics, feature importance, etc.)
+# ============================================================
+
+ARTIFACTS_DIR = PROJECT_ROOT / "artifacts"
+
+CLV_ARTIFACTS_DIR = ARTIFACTS_DIR / "clv"
 
 # ============================================================
 # Assets
