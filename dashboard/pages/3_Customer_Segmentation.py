@@ -94,16 +94,36 @@ st.header("📊 Average RFM by Cluster")
 
 st.caption(
     "The actual behaviour behind each cluster — useful for checking "
-    "whether a segment's name matches its numbers."
+    "whether a segment's name matches its numbers. Shown as separate "
+    "charts because Recency, Frequency, and Monetary are on very "
+    "different scales."
 )
 
-st.dataframe(
-    cluster_profile_df[
-        ["Cluster", "Recency", "Frequency", "Monetary", "CustomerCount"]
-    ].round(2),
-    use_container_width=True,
-    hide_index=True,
-)
+rfm_chart_cols = st.columns(3)
+
+for chart_col, metric in zip(rfm_chart_cols, ["Recency", "Frequency", "Monetary"]):
+    with chart_col:
+        fig_rfm = px.bar(
+            cluster_profile_df.sort_values(metric),
+            x=metric,
+            y="Cluster",
+            orientation="h",
+        )
+        fig_rfm.update_layout(
+            title=f"Avg. {metric}",
+            height=280,
+            margin=dict(l=10, r=10, t=40, b=10),
+        )
+        st.plotly_chart(fig_rfm, use_container_width=True)
+
+with st.expander("See exact numbers"):
+    st.dataframe(
+        cluster_profile_df[
+            ["Cluster", "Recency", "Frequency", "Monetary", "CustomerCount"]
+        ].round(2),
+        use_container_width=True,
+        hide_index=True,
+    )
 
 st.divider()
 

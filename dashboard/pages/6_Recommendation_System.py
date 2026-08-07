@@ -118,11 +118,27 @@ customer_recs = collaborative_df[
     collaborative_df["CustomerID"] == selected_customer
 ].sort_values("NeighborCount", ascending=False)
 
-st.dataframe(
-    customer_recs[["StockCode", "Description", "NeighborCount"]],
-    use_container_width=True,
-    hide_index=True,
-)
+rec_chart, rec_table = st.columns([1, 1])
+
+with rec_chart:
+    fig_customer_recs = px.bar(
+        customer_recs.sort_values("NeighborCount"),
+        x="NeighborCount",
+        y="Description",
+        orientation="h",
+    )
+    fig_customer_recs.update_layout(
+        height=340,
+        margin=dict(l=10, r=10, t=10, b=10),
+    )
+    st.plotly_chart(fig_customer_recs, use_container_width=True)
+
+with rec_table:
+    st.dataframe(
+        customer_recs[["StockCode", "Description", "NeighborCount"]],
+        use_container_width=True,
+        hide_index=True,
+    )
 
 st.caption(
     "**NeighborCount** — how many similar customers also bought this "
@@ -156,8 +172,24 @@ item_recs = item_similarity_df[
     item_similarity_df["CustomerID"] == selected_item_customer
 ].sort_values("SimilarityScore", ascending=False)
 
-st.dataframe(
-    item_recs[["StockCode", "Description", "SimilarityScore"]],
-    use_container_width=True,
-    hide_index=True,
-)
+item_chart, item_table = st.columns([1, 1])
+
+with item_chart:
+    fig_item_recs = px.bar(
+        item_recs.sort_values("SimilarityScore"),
+        x="SimilarityScore",
+        y="Description",
+        orientation="h",
+    )
+    fig_item_recs.update_layout(
+        height=340,
+        margin=dict(l=10, r=10, t=10, b=10),
+    )
+    st.plotly_chart(fig_item_recs, use_container_width=True)
+
+with item_table:
+    st.dataframe(
+        item_recs[["StockCode", "Description", "SimilarityScore"]],
+        use_container_width=True,
+        hide_index=True,
+    )

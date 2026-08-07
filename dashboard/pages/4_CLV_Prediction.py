@@ -9,6 +9,7 @@ Project: Intelligent Customer Analytics Platform
 """
 
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
 from utils.cache import load_csv
@@ -96,11 +97,16 @@ sample_df = prediction_df.sample(
     min(1500, len(prediction_df)), random_state=42
 )
 
-fig_scatter = px.scatter(
-    sample_df,
-    x="CLV",
-    y="PredictedCLV",
-    opacity=0.5,
+fig_scatter = go.Figure()
+
+fig_scatter.add_trace(
+    go.Scatter(
+        x=sample_df["CLV"],
+        y=sample_df["PredictedCLV"],
+        mode="markers",
+        marker=dict(opacity=0.5, size=6),
+        name="Customers",
+    )
 )
 fig_scatter.add_shape(
     type="line",
@@ -110,7 +116,12 @@ fig_scatter.add_shape(
     y1=sample_df["CLV"].max(),
     line=dict(dash="dash"),
 )
-fig_scatter.update_layout(height=420, margin=dict(l=10, r=10, t=10, b=10))
+fig_scatter.update_layout(
+    height=420,
+    margin=dict(l=10, r=10, t=10, b=10),
+    xaxis_title="CLV",
+    yaxis_title="PredictedCLV",
+)
 st.plotly_chart(fig_scatter, use_container_width=True)
 
 st.caption(
