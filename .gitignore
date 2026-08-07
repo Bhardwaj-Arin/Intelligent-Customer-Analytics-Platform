@@ -25,6 +25,8 @@ Thumbs.db
 
 # Large datasets
 data/raw/
+data/processed/final_cleaned_dataset.csv
+data/processed/cleaned_online_retail.csv
 
 # Jupyter
 .ipynb_checkpoints/
